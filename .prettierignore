@@ -1,0 +1,7 @@
+node_modules
+dist
+coverage
+.venv
+pnpm-lock.yaml
+uv.lock
+AeroMaint_AI_Project_Documentation.md
