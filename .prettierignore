@@ -5,3 +5,4 @@ coverage
 pnpm-lock.yaml
 uv.lock
 AeroMaint_AI_Project_Documentation.md
+tests/media-fixtures/synthetic-session

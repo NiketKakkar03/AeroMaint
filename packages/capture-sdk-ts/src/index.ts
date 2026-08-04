@@ -75,7 +75,7 @@ export class CaptureClient {
     } catch (error) {
       throw new CaptureSdkError(
         error instanceof ManifestValidationError
-          ? `Invalid manifest at ${String(error.path)}: ${String(error.message)}`
+          ? `Invalid manifest at ${error.path}: ${error.message}`
           : `Manifest validation failed: ${String(error)}`,
         "invalid_manifest"
       );

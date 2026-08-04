@@ -1,0 +1,47 @@
+{
+  "base_ns": "9007199254740993",
+  "clock_mappings": [
+    {
+      "clock_id": "right-device",
+      "expected_session_ns": "9007199264740993",
+      "source_ns": "500000000"
+    },
+    {
+      "clock_id": "right-device",
+      "expected_session_ns": "9007199364741093",
+      "source_ns": "600000000"
+    },
+    {
+      "clock_id": "right-device",
+      "expected_session_ns": "9007199264740991",
+      "source_ns": "499999999"
+    }
+  ],
+  "frame_queries": [
+    {
+      "at_or_before": 0,
+      "nearest": 0,
+      "offset_ns": "0"
+    },
+    {
+      "at_or_before": 0,
+      "nearest": 0,
+      "offset_ns": "25000000"
+    },
+    {
+      "at_or_before": 1,
+      "nearest": 2,
+      "offset_ns": "76000000"
+    },
+    {
+      "at_or_before": null,
+      "nearest": null,
+      "offset_ns": "130000000"
+    },
+    {
+      "at_or_before": 3,
+      "nearest": 3,
+      "offset_ns": "160000000"
+    }
+  ]
+}

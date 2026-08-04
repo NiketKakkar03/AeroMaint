@@ -65,3 +65,17 @@ Runtime validation exists in `packages/contracts` and
 out-of-range timestamps, duplicate identities, dangling references, out-of-bounds gaps, and
 overlapping gaps. Qualitative tests use the same golden JSON and intentionally damage these semantic
 relationships to prove failures are explicit.
+
+## Deterministic synchronization fixture
+
+`tests/media-fixtures/synthetic-session` contains two video frame indexes, IMU, pose, and event
+records, stereo calibration, declared missing-data intervals, a clock with a known offset and drift,
+and language-neutral expected lookups. Regenerate it with:
+
+```bash
+uv run python scripts/generate_sync_fixture.py
+```
+
+The committed `SHA256SUMS` file and cross-language tests prove regeneration is byte-for-byte stable.
+Frame lookup defaults to presentation time at-or-before the request; nearest-frame ties choose the
+earlier frame. Both lookup modes return no evidence when the requested time lies in a declared gap.

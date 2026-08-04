@@ -1,0 +1,164 @@
+{
+  "artifacts": [
+    {
+      "id": "left-index",
+      "logical_key": "camera-left/index.json",
+      "media_type": "application/vnd.aeromaint.frame-index+json",
+      "sha256": "93234a3eef4ca644dfcbf56cef0d54fa8c5ed80f8bc04808dad2b617d960f245",
+      "size_bytes": 583
+    },
+    {
+      "id": "right-index",
+      "logical_key": "camera-right/index.json",
+      "media_type": "application/vnd.aeromaint.frame-index+json",
+      "sha256": "72d9975c9f8494dcdf3662119f0141edf88907f1ddfee3ec51dd2dcc8f4bc110",
+      "size_bytes": 583
+    },
+    {
+      "id": "imu-samples",
+      "logical_key": "imu/samples.csv",
+      "media_type": "text/csv",
+      "sha256": "614cc1326684bd479e371a23d19f32c8fea1aa267658bec20e93247b08b5c4c9",
+      "size_bytes": 52
+    },
+    {
+      "id": "pose-samples",
+      "logical_key": "pose/samples.csv",
+      "media_type": "text/csv",
+      "sha256": "82774350fdbcc75240a392d9f67c3fade27bd9150881f6fc18b4b8c9946d96c2",
+      "size_bytes": 48
+    },
+    {
+      "id": "events",
+      "logical_key": "events/events.csv",
+      "media_type": "text/csv",
+      "sha256": "1847cab5801dce71415e70691cd5d7d48ed926e8b39f8032c6b00d83ba600aa7",
+      "size_bytes": 48
+    },
+    {
+      "id": "stereo-calibration",
+      "logical_key": "calibration/stereo.json",
+      "media_type": "application/json",
+      "sha256": "80fc4fcf357c19368b11a3dd12c4213be454c54a5339e422687e3a9f0f2fd703",
+      "size_bytes": 47
+    }
+  ],
+  "calibrations": [
+    {
+      "artifact_id": "stereo-calibration",
+      "id": "stereo-rig",
+      "kind": "stereo_camera"
+    }
+  ],
+  "clocks": [
+    {
+      "id": "session",
+      "rate_denominator": 1,
+      "rate_numerator": 1,
+      "session_epoch_ns": "0",
+      "source_epoch_ns": "0"
+    },
+    {
+      "id": "right-device",
+      "rate_denominator": 1000000,
+      "rate_numerator": 1000001,
+      "session_epoch_ns": "9007199264740993",
+      "source_epoch_ns": "500000000"
+    }
+  ],
+  "display_name": "Deterministic synchronization fixture",
+  "end_ns": "9007199464740993",
+  "provenance": {
+    "adapter": "generate_sync_fixture.py",
+    "adapter_version": "1.0.0",
+    "source_sha256": "bb626a9483dff4bdf4f4b8e4e998edd1199013f95ee3c9bd952aa453c9b60b35",
+    "source_type": "synthetic",
+    "source_uri": "aeromaint://fixtures/synthetic-sync-v1"
+  },
+  "schema_version": "1.0.0",
+  "session_clock_id": "session",
+  "session_id": "synthetic-sync-v1",
+  "start_ns": "9007199254740993",
+  "streams": [
+    {
+      "artifact_ids": [
+        "left-index"
+      ],
+      "calibration_ids": [
+        "stereo-rig"
+      ],
+      "clock_id": "session",
+      "end_ns": "9007199454740993",
+      "gaps": [
+        {
+          "end_ns": "9007199394740993",
+          "reason": "missing",
+          "start_ns": "9007199374740993"
+        }
+      ],
+      "id": "camera-left",
+      "kind": "video",
+      "sample_count": 5,
+      "schema_ref": "aeromaint://schemas/video-frame-index/1.0.0",
+      "start_ns": "9007199254740993"
+    },
+    {
+      "artifact_ids": [
+        "right-index"
+      ],
+      "calibration_ids": [
+        "stereo-rig"
+      ],
+      "clock_id": "right-device",
+      "end_ns": "9007199464740993",
+      "gaps": [],
+      "id": "camera-right",
+      "kind": "video",
+      "sample_count": 5,
+      "schema_ref": "aeromaint://schemas/video-frame-index/1.0.0",
+      "start_ns": "9007199264740993"
+    },
+    {
+      "artifact_ids": [
+        "imu-samples"
+      ],
+      "calibration_ids": [],
+      "clock_id": "session",
+      "end_ns": "9007199454740993",
+      "gaps": [],
+      "id": "imu-main",
+      "kind": "imu",
+      "sample_count": 1,
+      "schema_ref": "aeromaint://schemas/imu/1.0.0",
+      "start_ns": "9007199254740993"
+    },
+    {
+      "artifact_ids": [
+        "pose-samples"
+      ],
+      "calibration_ids": [],
+      "clock_id": "session",
+      "end_ns": "9007199454740993",
+      "gaps": [],
+      "id": "pose-ground-truth",
+      "kind": "pose",
+      "sample_count": 1,
+      "schema_ref": "aeromaint://schemas/pose/1.0.0",
+      "start_ns": "9007199254740993"
+    },
+    {
+      "artifact_ids": [
+        "events"
+      ],
+      "calibration_ids": [],
+      "clock_id": "session",
+      "end_ns": "9007199454740993",
+      "gaps": [],
+      "id": "events",
+      "kind": "event",
+      "sample_count": 1,
+      "schema_ref": "aeromaint://schemas/event/1.0.0",
+      "start_ns": "9007199254740993"
+    }
+  ]
+}

@@ -403,3 +403,6 @@ export function parseManifest(value: unknown): CaptureSessionManifest {
     }
   };
 }
+
+export { frameAtOrBefore, mapToSessionTime, nearestFrame } from "./clock.js";
+export type { IndexedFrame } from "./clock.js";

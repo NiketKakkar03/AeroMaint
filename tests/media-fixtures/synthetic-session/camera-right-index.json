@@ -1,0 +1,30 @@
+{
+  "frames": [
+    {
+      "frame_number": 0,
+      "keyframe": true,
+      "presentation_ns": "9007199264740993"
+    },
+    {
+      "frame_number": 1,
+      "keyframe": false,
+      "presentation_ns": "9007199314740993"
+    },
+    {
+      "frame_number": 2,
+      "keyframe": false,
+      "presentation_ns": "9007199364740993"
+    },
+    {
+      "frame_number": 3,
+      "keyframe": false,
+      "presentation_ns": "9007199414740993"
+    },
+    {
+      "frame_number": 4,
+      "keyframe": true,
+      "presentation_ns": "9007199464740993"
+    }
+  ],
+  "schema_version": "1.0.0"
+}
