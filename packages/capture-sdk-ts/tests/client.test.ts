@@ -1,16 +1,19 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it, vi } from "vitest";
 
 import { CaptureClient } from "../src/index.js";
 import type { CaptureSdkError } from "../src/index.js";
 
-const fixture = {
-  schema_version: "1.0.0",
-  session_id: "fixture-session-001",
-  display_name: "Fixture",
-  start_ns: "9007199254740993",
-  end_ns: "9007199254741000",
-  streams: []
-};
+const fixture: Record<string, unknown> = JSON.parse(
+  readFileSync(
+    new URL(
+      "../../../tests/contract/fixtures/capture-manifest-v1.json",
+      import.meta.url
+    ),
+    "utf8"
+  )
+) as Record<string, unknown>;
 
 describe("CaptureClient", () => {
   it("fetches a manifest and preserves timestamps beyond Number precision", async () => {

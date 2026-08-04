@@ -1,8 +1,8 @@
 import {
   CAPTURE_MANIFEST_SCHEMA_VERSION,
+  ManifestValidationError,
   parseManifest,
-  type CaptureSessionManifest,
-  type CaptureSessionManifestJson
+  type CaptureSessionManifest
 } from "@aeromaint/contracts";
 
 export class CaptureSdkError extends Error {
@@ -22,26 +22,12 @@ export interface CaptureClientOptions {
   readonly fetch?: typeof globalThis.fetch;
 }
 
-interface UnversionedManifestJson {
-  readonly schema_version: string;
-  readonly session_id: string;
-  readonly display_name: string;
-  readonly start_ns: string;
-  readonly end_ns: string;
-  readonly streams: readonly unknown[];
-}
-
-function isManifestJson(value: unknown): value is UnversionedManifestJson {
-  if (typeof value !== "object" || value === null) return false;
+function schemaVersion(value: unknown): string | undefined {
+  if (typeof value !== "object" || value === null) return undefined;
   const candidate = value as Record<string, unknown>;
-  return (
-    typeof candidate.schema_version === "string" &&
-    typeof candidate.session_id === "string" &&
-    typeof candidate.display_name === "string" &&
-    typeof candidate.start_ns === "string" &&
-    typeof candidate.end_ns === "string" &&
-    Array.isArray(candidate.streams)
-  );
+  return typeof candidate.schema_version === "string"
+    ? candidate.schema_version
+    : undefined;
 }
 
 export class CaptureClient {
@@ -70,24 +56,27 @@ export class CaptureClient {
     }
 
     const payload: unknown = await response.json();
-    if (!isManifestJson(payload)) {
+    const version = schemaVersion(payload);
+    if (version === undefined) {
       throw new CaptureSdkError(
         "Response is not a capture manifest",
         "invalid_manifest"
       );
     }
-    if (payload.schema_version !== CAPTURE_MANIFEST_SCHEMA_VERSION) {
+    if (version !== CAPTURE_MANIFEST_SCHEMA_VERSION) {
       throw new CaptureSdkError(
-        `Unsupported manifest schema ${payload.schema_version}`,
+        `Unsupported manifest schema ${version}`,
         "unsupported_schema"
       );
     }
 
     try {
-      return parseManifest(payload as CaptureSessionManifestJson);
+      return parseManifest(payload);
     } catch (error) {
       throw new CaptureSdkError(
-        `Manifest contains an invalid timestamp: ${String(error)}`,
+        error instanceof ManifestValidationError
+          ? `Invalid manifest at ${String(error.path)}: ${String(error.message)}`
+          : `Manifest validation failed: ${String(error)}`,
         "invalid_manifest"
       );
     }
