@@ -1,0 +1,26 @@
+sensor_type: camera
+comment: AeroMaint synthetic right camera
+rate_hz: 20
+resolution: [2, 1]
+intrinsics: [1.0, 1.0, 0.5, 0.5]
+distortion_model: radial-tangential
+distortion_coefficients: [0.0, 0.0, 0.0, 0.0]
+T_BS:
+  [
+    1.0,
+    0.0,
+    0.0,
+    -0.1,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0
+  ]

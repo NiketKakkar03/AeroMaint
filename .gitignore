@@ -17,11 +17,19 @@ __pycache__/
 
 .env
 .env.local
-data/
+data/*
+!data/.gitkeep
 artifacts/
 models/
 *.mcap
 *.bag
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.mp4
+*.mov
+*.avi
 
 .DS_Store
 .idea/

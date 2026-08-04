@@ -27,7 +27,7 @@ package = false
 [tool.ruff]
 target-version = "py311"
 line-length = 100
-src = ["apps/data-api/src", "apps/worker/src"]
+src = ["apps/data-api/src", "apps/worker/src", "packages", "pipelines"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "ASYNC", "S", "RUF"]
@@ -38,12 +38,12 @@ select = ["E", "F", "I", "B", "UP", "ASYNC", "S", "RUF"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
-mypy_path = ["apps/data-api/src", "apps/worker/src"]
+mypy_path = ["apps/data-api/src", "apps/worker/src", "."]
 
 [tool.pytest.ini_options]
 addopts = "--strict-config --strict-markers --cov=aeromaint_api --cov-report=term-missing"
 pythonpath = [".", "apps/data-api/src", "apps/worker/src"]
-testpaths = ["apps/data-api/tests", "tests/contract"]
+testpaths = ["apps/data-api/tests", "tests/contract", "tests/integration"]
 
 [tool.coverage.run]
 branch = true

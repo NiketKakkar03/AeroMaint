@@ -1,0 +1,196 @@
+{
+  "artifacts": [
+    {
+      "id": "sha256-4ee8a93412196f1a3f2a61b7ea57f11db696fc82777f94b0d42f7a657a8a608f",
+      "logical_key": "sessions/euroc-8e626693605f16306cf4d6b8/calibration/euroc.json",
+      "media_type": "application/vnd.aeromaint.calibration+json",
+      "sha256": "4ee8a93412196f1a3f2a61b7ea57f11db696fc82777f94b0d42f7a657a8a608f",
+      "size_bytes": 1229
+    },
+    {
+      "id": "sha256-2264f8ceff72b5cb2f4802daf6bb30114165ce19d4fcf0308767b6456dcc7cb4",
+      "logical_key": "sessions/euroc-8e626693605f16306cf4d6b8/camera-left/frames/9007199254740993.pgm",
+      "media_type": "image/x-portable-graymap",
+      "sha256": "2264f8ceff72b5cb2f4802daf6bb30114165ce19d4fcf0308767b6456dcc7cb4",
+      "size_bytes": 16
+    },
+    {
+      "id": "sha256-f4cdb1aeb780c70c57a66e69eee410be96fda87bca7b1e6252db561003b7102e",
+      "logical_key": "sessions/euroc-8e626693605f16306cf4d6b8/camera-left/frames/9007199304740993.pgm",
+      "media_type": "image/x-portable-graymap",
+      "sha256": "f4cdb1aeb780c70c57a66e69eee410be96fda87bca7b1e6252db561003b7102e",
+      "size_bytes": 17
+    },
+    {
+      "id": "sha256-e55f290eae2eabb7d5f667ed9ec08f5a546fac2f82e03ab0c2d21a725ef18c8f",
+      "logical_key": "sessions/euroc-8e626693605f16306cf4d6b8/camera-left/frames/9007199404740993.pgm",
+      "media_type": "image/x-portable-graymap",
+      "sha256": "e55f290eae2eabb7d5f667ed9ec08f5a546fac2f82e03ab0c2d21a725ef18c8f",
+      "size_bytes": 18
+    },
+    {
+      "id": "sha256-7c4416892703445016a470792eb81349c25a22b8114b5e50bf60edb7005282b3",
+      "logical_key": "sessions/euroc-8e626693605f16306cf4d6b8/camera-left/index.json",
+      "media_type": "application/vnd.aeromaint.frame-index+json",
+      "sha256": "7c4416892703445016a470792eb81349c25a22b8114b5e50bf60edb7005282b3",
+      "size_bytes": 823
+    },
+    {
+      "id": "sha256-7b79a9aa61d40c0afd0eeaabb11b38d3a72e364e717b8da9bd1887d66336390f",
+      "logical_key": "sessions/euroc-8e626693605f16306cf4d6b8/camera-right/frames/9007199254740993.pgm",
+      "media_type": "image/x-portable-graymap",
+      "sha256": "7b79a9aa61d40c0afd0eeaabb11b38d3a72e364e717b8da9bd1887d66336390f",
+      "size_bytes": 16
+    },
+    {
+      "id": "sha256-cb81f992d9b2b6908c460abf62f9b7616b9e78e7373e7622cac822c2fbee661c",
+      "logical_key": "sessions/euroc-8e626693605f16306cf4d6b8/camera-right/frames/9007199304740993.pgm",
+      "media_type": "image/x-portable-graymap",
+      "sha256": "cb81f992d9b2b6908c460abf62f9b7616b9e78e7373e7622cac822c2fbee661c",
+      "size_bytes": 18
+    },
+    {
+      "id": "sha256-73dd23c34b0e6a53065f0d16b096a5d72d3a854f6fc5e43dd7ca392bbc2e283a",
+      "logical_key": "sessions/euroc-8e626693605f16306cf4d6b8/camera-right/frames/9007199404740993.pgm",
+      "media_type": "image/x-portable-graymap",
+      "sha256": "73dd23c34b0e6a53065f0d16b096a5d72d3a854f6fc5e43dd7ca392bbc2e283a",
+      "size_bytes": 18
+    },
+    {
+      "id": "sha256-89c278f21753788b5815458441bb8e748669f80f3d64e10ccb2665f4dff875fd",
+      "logical_key": "sessions/euroc-8e626693605f16306cf4d6b8/camera-right/index.json",
+      "media_type": "application/vnd.aeromaint.frame-index+json",
+      "sha256": "89c278f21753788b5815458441bb8e748669f80f3d64e10ccb2665f4dff875fd",
+      "size_bytes": 823
+    },
+    {
+      "id": "sha256-e757031e1139976502c881f3d62aae13691b152fd6013a0c055f89ff57ac50de",
+      "logical_key": "sessions/euroc-8e626693605f16306cf4d6b8/imu-main/records.ndjson",
+      "media_type": "application/x-ndjson",
+      "sha256": "e757031e1139976502c881f3d62aae13691b152fd6013a0c055f89ff57ac50de",
+      "size_bytes": 344
+    },
+    {
+      "id": "sha256-d74a4de45d86b80c070132445c2877842428df6da77c33e3cf313b2d2fb33d7f",
+      "logical_key": "sessions/euroc-8e626693605f16306cf4d6b8/pose-ground-truth/records.ndjson",
+      "media_type": "application/x-ndjson",
+      "sha256": "d74a4de45d86b80c070132445c2877842428df6da77c33e3cf313b2d2fb33d7f",
+      "size_bytes": 267
+    }
+  ],
+  "calibrations": [
+    {
+      "artifact_id": "sha256-4ee8a93412196f1a3f2a61b7ea57f11db696fc82777f94b0d42f7a657a8a608f",
+      "id": "stereo-rig",
+      "kind": "stereo_camera"
+    }
+  ],
+  "clocks": [
+    {
+      "id": "session",
+      "rate_denominator": 1,
+      "rate_numerator": 1,
+      "session_epoch_ns": "0",
+      "source_epoch_ns": "0"
+    }
+  ],
+  "display_name": "EuRoC euroc-mini",
+  "end_ns": "9007199404740993",
+  "provenance": {
+    "adapter": "aeromaint-euroc",
+    "adapter_version": "1.0.0",
+    "source_metadata": {
+      "layout": "mav0",
+      "sensor_names": ["cam0", "cam1", "imu0"]
+    },
+    "source_sha256": "8e626693605f16306cf4d6b8a12ea0e2c5fd33be8e35f7b0eaab07d9677f50dc",
+    "source_type": "euroc-mav",
+    "source_uri": "fixture://euroc-mini"
+  },
+  "schema_version": "1.0.0",
+  "session_clock_id": "session",
+  "session_id": "euroc-8e626693605f16306cf4d6b8",
+  "start_ns": "9007199254740993",
+  "streams": [
+    {
+      "artifact_ids": [
+        "sha256-7c4416892703445016a470792eb81349c25a22b8114b5e50bf60edb7005282b3",
+        "sha256-2264f8ceff72b5cb2f4802daf6bb30114165ce19d4fcf0308767b6456dcc7cb4",
+        "sha256-f4cdb1aeb780c70c57a66e69eee410be96fda87bca7b1e6252db561003b7102e",
+        "sha256-e55f290eae2eabb7d5f667ed9ec08f5a546fac2f82e03ab0c2d21a725ef18c8f"
+      ],
+      "calibration_ids": ["stereo-rig"],
+      "clock_id": "session",
+      "end_ns": "9007199404740993",
+      "gaps": [
+        {
+          "end_ns": "9007199404740993",
+          "reason": "missing",
+          "start_ns": "9007199354740993"
+        }
+      ],
+      "id": "camera-left",
+      "kind": "video",
+      "sample_count": 3,
+      "schema_ref": "aeromaint://schemas/video-frame-index/1.0.0",
+      "start_ns": "9007199254740993"
+    },
+    {
+      "artifact_ids": [
+        "sha256-89c278f21753788b5815458441bb8e748669f80f3d64e10ccb2665f4dff875fd",
+        "sha256-7b79a9aa61d40c0afd0eeaabb11b38d3a72e364e717b8da9bd1887d66336390f",
+        "sha256-cb81f992d9b2b6908c460abf62f9b7616b9e78e7373e7622cac822c2fbee661c",
+        "sha256-73dd23c34b0e6a53065f0d16b096a5d72d3a854f6fc5e43dd7ca392bbc2e283a"
+      ],
+      "calibration_ids": ["stereo-rig"],
+      "clock_id": "session",
+      "end_ns": "9007199404740993",
+      "gaps": [
+        {
+          "end_ns": "9007199404740993",
+          "reason": "missing",
+          "start_ns": "9007199354740993"
+        }
+      ],
+      "id": "camera-right",
+      "kind": "video",
+      "sample_count": 3,
+      "schema_ref": "aeromaint://schemas/video-frame-index/1.0.0",
+      "start_ns": "9007199254740993"
+    },
+    {
+      "artifact_ids": [
+        "sha256-e757031e1139976502c881f3d62aae13691b152fd6013a0c055f89ff57ac50de"
+      ],
+      "calibration_ids": [],
+      "clock_id": "session",
+      "end_ns": "9007199404740993",
+      "gaps": [
+        {
+          "end_ns": "9007199404740993",
+          "reason": "missing",
+          "start_ns": "9007199269740993"
+        }
+      ],
+      "id": "imu-main",
+      "kind": "imu",
+      "sample_count": 4,
+      "schema_ref": "aeromaint://schemas/imu/1.0.0",
+      "start_ns": "9007199254740993"
+    },
+    {
+      "artifact_ids": [
+        "sha256-d74a4de45d86b80c070132445c2877842428df6da77c33e3cf313b2d2fb33d7f"
+      ],
+      "calibration_ids": [],
+      "clock_id": "session",
+      "end_ns": "9007199404740993",
+      "gaps": [],
+      "id": "pose-ground-truth",
+      "kind": "pose",
+      "sample_count": 3,
+      "schema_ref": "aeromaint://schemas/pose/1.0.0",
+      "start_ns": "9007199254740993"
+    }
+  ]
+}
