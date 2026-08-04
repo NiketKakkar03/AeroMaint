@@ -8,11 +8,11 @@ import {
 describe("parseManifest", () => {
   it("preserves nanosecond precision with bigint", () => {
     const manifest = parseManifest({
-      schemaVersion: CAPTURE_MANIFEST_SCHEMA_VERSION,
-      sessionId: "fixture-01",
-      displayName: "Fixture",
-      startNs: "9007199254740993",
-      endNs: "9007199254741000",
+      schema_version: CAPTURE_MANIFEST_SCHEMA_VERSION,
+      session_id: "fixture-01",
+      display_name: "Fixture",
+      start_ns: "9007199254740993",
+      end_ns: "9007199254741000",
       streams: []
     });
 

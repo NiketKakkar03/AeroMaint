@@ -67,6 +67,12 @@ importers:
         specifier: ^7.0.6
         version: 7.3.6(@types/node@24.13.3)
 
+  packages/capture-sdk-ts:
+    dependencies:
+      '@aeromaint/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+
   packages/contracts: {}
 
   packages/playback-core:

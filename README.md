@@ -60,3 +60,15 @@ infrastructure       Local deployment configuration
 ```
 
 The full product and system design remains in [`AeroMaint_AI_Project_Documentation.md`](./AeroMaint_AI_Project_Documentation.md).
+
+## Phase 0 fixture vertical slice
+
+The API exposes one deterministic in-memory fixture while persistence and real ingestion are built:
+
+```bash
+curl http://localhost:8000/v1/sessions/fixture-session-001/manifest
+```
+
+The `@aeromaint/capture-sdk` package consumes this endpoint and converts decimal-string nanosecond
+timestamps to `bigint`. Run `make check` to execute the Python endpoint, OpenAPI, contract, and SDK
+tests together.

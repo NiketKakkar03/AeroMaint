@@ -29,13 +29,26 @@ export interface CaptureSessionManifest {
 
 export interface CaptureSessionManifestJson extends Omit<
   CaptureSessionManifest,
-  "startNs" | "endNs" | "streams"
+  | "schemaVersion"
+  | "sessionId"
+  | "displayName"
+  | "startNs"
+  | "endNs"
+  | "streams"
 > {
-  readonly startNs: string;
-  readonly endNs: string;
-  readonly streams: readonly (Omit<CaptureStream, "startNs" | "endNs"> & {
-    readonly startNs: string;
-    readonly endNs: string;
+  readonly schema_version: typeof CAPTURE_MANIFEST_SCHEMA_VERSION;
+  readonly session_id: string;
+  readonly display_name: string;
+  readonly start_ns: string;
+  readonly end_ns: string;
+  readonly streams: readonly (Omit<
+    CaptureStream,
+    "clockId" | "startNs" | "endNs" | "sampleCount"
+  > & {
+    readonly clock_id: string;
+    readonly start_ns: string;
+    readonly end_ns: string;
+    readonly sample_count: number;
   })[];
 }
 
@@ -47,13 +60,18 @@ export function parseManifest(
   manifest: CaptureSessionManifestJson
 ): CaptureSessionManifest {
   return {
-    ...manifest,
-    startNs: timestampNs(manifest.startNs),
-    endNs: timestampNs(manifest.endNs),
+    schemaVersion: manifest.schema_version,
+    sessionId: manifest.session_id,
+    displayName: manifest.display_name,
+    startNs: timestampNs(manifest.start_ns),
+    endNs: timestampNs(manifest.end_ns),
     streams: manifest.streams.map((stream) => ({
-      ...stream,
-      startNs: timestampNs(stream.startNs),
-      endNs: timestampNs(stream.endNs)
+      id: stream.id,
+      kind: stream.kind,
+      clockId: stream.clock_id,
+      startNs: timestampNs(stream.start_ns),
+      endNs: timestampNs(stream.end_ns),
+      sampleCount: stream.sample_count
     }))
   };
 }
