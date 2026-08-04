@@ -20,6 +20,8 @@ Use a modular monorepo with:
 
 All authoritative timestamps cross platform boundaries as signed 64-bit nanoseconds encoded as decimal strings in JSON and `bigint` in TypeScript. Consumers depend on versioned contracts rather than persistence models.
 
+Detailed follow-up decisions are indexed in [`../system_design.md`](../system_design.md).
+
 ## Consequences
 
 The repository has two toolchains, so a single `make check` command owns the combined quality gate. Deployable processes remain separable without introducing independently versioned microservices prematurely.
