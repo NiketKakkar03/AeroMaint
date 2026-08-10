@@ -163,6 +163,42 @@ describe("CaptureClient", () => {
     ]);
   });
 
+  it("unwraps the API items envelope for JSON sample windows", async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(
+      Response.json({
+        items: [
+          {
+            timestamp_ns: "9007199254740993",
+            values: { ax: 1, ay: 2, az: 3 }
+          }
+        ],
+        next_cursor: null,
+        range: {
+          start_ns: "9007199254740993",
+          end_ns: "9007199454740993",
+          end_exclusive: true
+        },
+        schema_ref: "aeromaint://schemas/imu/1.0.0"
+      })
+    );
+    const range = await new CaptureClient({
+      baseUrl: "https://api.test",
+      fetch
+    }).getSampleRange("fixture-session-001", "imu-main", {
+      startNs: 9_007_199_254_740_993n,
+      endNs: 9_007_199_454_740_993n,
+      format: "json"
+    });
+
+    expect(Array.isArray(range.data)).toBe(true);
+    expect(range.data).toEqual([
+      {
+        timestamp_ns: 9_007_199_254_740_993n,
+        values: { ax: 1, ay: 2, az: 3 }
+      }
+    ]);
+  });
+
   it("normalizes frame lookup and supports gaps", async () => {
     const fetch = vi
       .fn<typeof globalThis.fetch>()

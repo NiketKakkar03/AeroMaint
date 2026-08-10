@@ -694,7 +694,9 @@ export class CaptureClient {
           "Sample range end_ns"
         ),
         contentType,
-        data: normalizeNanoseconds(root.samples ?? root.data ?? payload),
+        data: normalizeNanoseconds(
+          root.samples ?? root.data ?? root.items ?? payload
+        ),
         ...(nextCursor === undefined ? {} : { nextCursor })
       };
     }
