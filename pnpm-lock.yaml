@@ -38,6 +38,9 @@ importers:
 
   apps/viewer:
     dependencies:
+      '@aeromaint/capture-sdk':
+        specifier: workspace:*
+        version: link:../../packages/capture-sdk-ts
       '@aeromaint/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
