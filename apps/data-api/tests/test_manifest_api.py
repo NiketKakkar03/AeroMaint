@@ -65,7 +65,9 @@ def test_unknown_session_has_stable_error_code() -> None:
     response = TestClient(app).get("/v1/sessions/missing/manifest")
 
     assert response.status_code == 404
-    assert response.json()["detail"]["code"] == "session_not_found"
+    assert response.headers["content-type"].startswith("application/problem+json")
+    assert response.json()["code"] == "SESSION_NOT_FOUND"
+    assert response.json()["request_id"]
 
 
 def test_openapi_exposes_versioned_manifest_endpoint_and_string_timestamps() -> None:
