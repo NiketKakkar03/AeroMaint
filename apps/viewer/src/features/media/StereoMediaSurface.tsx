@@ -3,6 +3,7 @@ import type {
   CaptureSessionManifest,
   CaptureStream
 } from "@aeromaint/contracts";
+import type { PlaybackMetricEvent } from "@aeromaint/observability";
 import type { ViewerDataSource } from "../../lib/sdk.js";
 import { SeekCoordinator, timestampInGap } from "../playback/timeline.js";
 
@@ -12,6 +13,7 @@ interface Props {
   readonly playheadNs: bigint;
   readonly playing: boolean;
   readonly playbackRate: number;
+  readonly onMetricEvent?: (event: PlaybackMetricEvent) => void;
 }
 
 function MediaPane(
@@ -21,6 +23,8 @@ function MediaPane(
     props;
   const video = useRef<HTMLVideoElement>(null);
   const coordinator = useRef(new SeekCoordinator());
+  const seekStartedAt = useRef<number | null>(null);
+  const bufferingStartedAt = useRef<number | null>(null);
   const [state, setState] = useState<
     "loading" | "ready" | "buffering" | "error"
   >("loading");
@@ -30,6 +34,7 @@ function MediaPane(
     const element = video.current;
     if (!element || !stream || gap) return;
     const generation = coordinator.current.begin();
+    seekStartedAt.current = performance.now();
     const seconds = Number(playheadNs - manifest.startNs) / 1_000_000_000;
     if (
       Number.isFinite(seconds) &&
@@ -38,7 +43,17 @@ function MediaPane(
       element.currentTime = Math.max(0, seconds);
     element.playbackRate = playbackRate;
     const settle = () => {
-      if (coordinator.current.isCurrent(generation)) setState("ready");
+      if (coordinator.current.isCurrent(generation)) {
+        setState("ready");
+        if (seekStartedAt.current !== null) {
+          props.onMetricEvent?.({
+            type: "seek",
+            latencyMs: performance.now() - seekStartedAt.current,
+            warm: element.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
+          });
+          seekStartedAt.current = null;
+        }
+      }
     };
     element.addEventListener("seeked", settle, { once: true });
     if (playing)
@@ -77,9 +92,33 @@ function MediaPane(
           preload="metadata"
           onCanPlay={() => {
             setState("ready");
+            props.onMetricEvent?.({
+              type: "first-frame",
+              atMs: performance.now()
+            });
+            if (bufferingStartedAt.current !== null) {
+              props.onMetricEvent?.({
+                type: "buffering",
+                durationMs: performance.now() - bufferingStartedAt.current
+              });
+              bufferingStartedAt.current = null;
+            }
           }}
           onWaiting={() => {
             setState("buffering");
+            bufferingStartedAt.current ??= performance.now();
+          }}
+          onTimeUpdate={(event) => {
+            const mediaTimeNs =
+              manifest.startNs +
+              BigInt(
+                Math.round(event.currentTarget.currentTime * 1_000_000_000)
+              );
+            props.onMetricEvent?.({
+              type: "frame",
+              driftMs: Number(mediaTimeNs - playheadNs) / 1_000_000,
+              late: Math.abs(Number(mediaTimeNs - playheadNs)) > 80_000_000
+            });
           }}
           onError={() => {
             setState("error");

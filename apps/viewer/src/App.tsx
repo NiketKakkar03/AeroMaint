@@ -1,11 +1,22 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { CaptureSessionManifest } from "@aeromaint/contracts";
+import {
+  PlaybackMetricsCollector,
+  observeBrowserResources,
+  type PlaybackMetricEvent,
+  type ViewerBenchmarkReport
+} from "@aeromaint/observability";
 import {
   initialPlaybackState,
   type PlaybackState
 } from "@aeromaint/playback-core";
 import { StereoMediaSurface } from "./features/media/StereoMediaSurface.js";
+import { DiagnosticsPanel } from "./features/diagnostics/DiagnosticsPanel.js";
+import { downloadBenchmarkReport } from "./features/diagnostics/reportExport.js";
 import { PlaybackControls } from "./features/playback/PlaybackControls.js";
+import { Timeline } from "./features/playback/PlaybackTimeline.js";
+import { SensorPlot } from "./features/sensors/SensorPlot.js";
+import type { VectorSample } from "./features/sensors/sensorMath.js";
 import {
   clampTimestamp,
   timestampFromUrl,
@@ -43,7 +54,80 @@ function SessionViewer({
     status: "paused",
     currentTimeNs: timestampFromUrl(window.location.search, manifest)
   }));
+  const [sensorSamples, setSensorSamples] = useState<readonly VectorSample[]>(
+    []
+  );
+  const [sensorState, setSensorState] = useState<"loading" | "ready" | "error">(
+    "loading"
+  );
+  const metrics = useRef(new PlaybackMetricsCollector(performance.now()));
+  const startedAt = useRef(performance.now());
+  const [report, setReport] = useState<ViewerBenchmarkReport>();
   const playing = playback.status === "playing";
+  const sensorStream = manifest.streams.find(
+    (stream) => stream.kind !== "video"
+  );
+  const gaps = manifest.streams.flatMap((stream) => stream.gaps);
+  const recordMetric = (event: PlaybackMetricEvent) => {
+    metrics.current.record(event);
+  };
+  useEffect(() => {
+    if (!sensorStream) {
+      setSensorSamples([]);
+      setSensorState("ready");
+      return;
+    }
+    const controller = new AbortController();
+    setSensorState("loading");
+    void dataSource
+      .loadVectorSamples(
+        manifest.sessionId,
+        sensorStream.id,
+        sensorStream.startNs,
+        sensorStream.endNs,
+        controller.signal
+      )
+      .then(
+        (samples) => {
+          setSensorSamples(samples);
+          setSensorState("ready");
+        },
+        () => {
+          if (!controller.signal.aborted) setSensorState("error");
+        }
+      );
+    return () => {
+      controller.abort();
+    };
+  }, [dataSource, manifest.sessionId, sensorStream]);
+  useEffect(() => {
+    const monitor = observeBrowserResources(metrics.current);
+    const update = () => {
+      monitor.sample();
+      setReport(
+        metrics.current.report(
+          {
+            runId: `${manifest.sessionId}-${String(Math.round(startedAt.current))}`,
+            startedAt: new Date().toISOString(),
+            browser: navigator.userAgent,
+            browserVersion: navigator.userAgent,
+            hardware: `${String(navigator.hardwareConcurrency)} logical cores`,
+            dataset: manifest.displayName,
+            datasetVersion: manifest.schemaVersion
+          },
+          performance.now() - startedAt.current,
+          1_000,
+          { warmSeekP95Ms: 250, absoluteDriftP95Ms: 80 }
+        )
+      );
+    };
+    update();
+    const timer = window.setInterval(update, 1_000);
+    return () => {
+      window.clearInterval(timer);
+      monitor.disconnect();
+    };
+  }, [manifest]);
   useEffect(() => {
     window.history.replaceState(
       null,
@@ -94,7 +178,8 @@ function SessionViewer({
         manifest={manifest}
         playheadNs={playback.currentTimeNs}
         playing={playing}
-        playbackRate={1}
+        playbackRate={playback.playbackRate}
+        onMetricEvent={recordMetric}
       />
       <PlaybackControls
         manifest={manifest}
@@ -115,6 +200,55 @@ function SessionViewer({
           }));
         }}
       />
+      <Timeline
+        range={{ startNs: manifest.startNs, endNs: manifest.endNs }}
+        currentTimeNs={playback.currentTimeNs}
+        gaps={gaps}
+        onTogglePlayback={() => {
+          setPlayback((current) => ({
+            ...current,
+            status: current.status === "playing" ? "paused" : "playing"
+          }));
+        }}
+        onSeek={(currentTimeNs) => {
+          setPlayback((current) => ({
+            ...current,
+            status: "paused",
+            currentTimeNs,
+            seekGeneration: current.seekGeneration + 1
+          }));
+        }}
+      />
+      {sensorStream ? (
+        sensorState === "ready" ? (
+          <SensorPlot
+            title={sensorStream.id}
+            unit="stream units"
+            samples={sensorSamples}
+            gaps={sensorStream.gaps}
+            startNs={sensorStream.startNs}
+            endNs={sensorStream.endNs}
+            selectedTimeNs={playback.currentTimeNs}
+            onSelectTime={(currentTimeNs) => {
+              setPlayback((current) => ({
+                ...current,
+                status: "paused",
+                currentTimeNs,
+                seekGeneration: current.seekGeneration + 1
+              }));
+            }}
+          />
+        ) : (
+          <p role={sensorState === "error" ? "alert" : "status"}>
+            {sensorState === "error"
+              ? "Sensor samples could not be loaded."
+              : "Loading sensor samples…"}
+          </p>
+        )
+      ) : null}
+      {report ? (
+        <DiagnosticsPanel report={report} onExport={downloadBenchmarkReport} />
+      ) : null}
       <aside>
         Educational decision-support prototype. Missing evidence and
         compatibility failures are shown explicitly.
@@ -129,11 +263,18 @@ export function App({
   readonly dataSource?: ViewerDataSource;
 }) {
   const configuredBaseUrl: unknown = import.meta.env.VITE_API_BASE_URL;
-  const baseUrl =
-    typeof configuredBaseUrl === "string" ? configuredBaseUrl : "/api";
+  const baseUrl = new URL(
+    typeof configuredBaseUrl === "string" ? configuredBaseUrl : "/api",
+    window.location.origin
+  ).toString();
+  const configuredToken: unknown = import.meta.env.VITE_API_TOKEN;
+  const token =
+    typeof configuredToken === "string" ? configuredToken : undefined;
   const dataSource = useMemo(
-    () => suppliedDataSource ?? createViewerDataSource(baseUrl),
-    [baseUrl, suppliedDataSource]
+    () =>
+      suppliedDataSource ??
+      createViewerDataSource(baseUrl, globalThis.fetch.bind(globalThis), token),
+    [baseUrl, suppliedDataSource, token]
   );
   const [route, setRoute] = useState(currentRoute);
   const [sessions, setSessions] = useState<readonly SessionSummary[]>([]);

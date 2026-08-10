@@ -3,6 +3,10 @@ import type {
   CaptureSessionManifest,
   CaptureStream
 } from "@aeromaint/contracts";
+import type { VectorSample } from "../features/sensors/sensorMath.js";
+
+const defaultFetch: typeof globalThis.fetch = (input, init) =>
+  globalThis.fetch(input, init);
 
 export interface SessionSummary {
   readonly id: string;
@@ -26,6 +30,13 @@ export interface ViewerDataSource {
     stream: CaptureStream,
     manifest: CaptureSessionManifest
   ): readonly MediaSource[];
+  loadVectorSamples(
+    sessionId: string,
+    streamId: string,
+    startNs: bigint,
+    endNs: bigint,
+    signal?: AbortSignal
+  ): Promise<readonly VectorSample[]>;
 }
 
 interface SessionListItem {
@@ -52,18 +63,29 @@ function processingStatus(
 
 export function createViewerDataSource(
   baseUrl = "/api",
-  fetchImplementation: typeof globalThis.fetch = globalThis.fetch
+  fetchImplementation: typeof globalThis.fetch = defaultFetch,
+  token?: string
 ): ViewerDataSource {
   const normalizedBase = baseUrl.replace(/\/$/, "");
   const client = new CaptureClient({
     baseUrl: normalizedBase,
-    fetch: fetchImplementation
+    fetch: fetchImplementation,
+    ...(token === undefined || token.length === 0 ? {} : { auth: token })
   });
+  const authorizationHeaders =
+    token === undefined || token.length === 0
+      ? undefined
+      : { Authorization: `Bearer ${token}` };
   return {
     async listSessions(signal) {
       const response = await fetchImplementation(
         `${normalizedBase}/v1/sessions`,
-        { signal: signal ?? null }
+        {
+          ...(authorizationHeaders === undefined
+            ? {}
+            : { headers: authorizationHeaders }),
+          signal: signal ?? null
+        }
       );
       if (!response.ok)
         throw new Error(`Session request failed (${String(response.status)})`);
@@ -98,6 +120,34 @@ export function createViewerDataSource(
       return artifact?.mediaType.startsWith("video/")
         ? [{ src, type: artifact.mediaType }]
         : [{ src }];
+    },
+    async loadVectorSamples(sessionId, streamId, startNs, endNs, signal) {
+      const range = await client.getSampleRange(sessionId, streamId, {
+        startNs,
+        endNs,
+        format: "json",
+        limit: 100,
+        ...(signal === undefined ? {} : { signal })
+      });
+      if (!Array.isArray(range.data)) return [];
+      return range.data.flatMap((candidate): VectorSample[] => {
+        if (typeof candidate !== "object" || candidate === null) return [];
+        const row = candidate as Record<string, unknown>;
+        const values =
+          typeof row.values === "object" && row.values !== null
+            ? (row.values as Record<string, unknown>)
+            : row;
+        const timestamp = row.timestamp_ns ?? row.timestampNs;
+        const x = values.x ?? values.ax ?? values.px;
+        const y = values.y ?? values.ay ?? values.py;
+        const z = values.z ?? values.az ?? values.pz;
+        return typeof timestamp === "bigint" &&
+          typeof x === "number" &&
+          typeof y === "number" &&
+          typeof z === "number"
+          ? [{ timeNs: timestamp, x, y, z }]
+          : [];
+      });
     }
   };
 }
