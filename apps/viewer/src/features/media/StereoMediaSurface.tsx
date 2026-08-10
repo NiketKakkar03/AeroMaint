@@ -4,6 +4,7 @@ import type {
   CaptureStream
 } from "@aeromaint/contracts";
 import type { PlaybackMetricEvent } from "@aeromaint/observability";
+import { selectDecoderCapability } from "@aeromaint/playback-core";
 import type { ViewerDataSource } from "../../lib/sdk.js";
 import { SeekCoordinator, timestampInGap } from "../playback/timeline.js";
 
@@ -28,7 +29,30 @@ function MediaPane(
   const [state, setState] = useState<
     "loading" | "ready" | "buffering" | "error"
   >("loading");
+  const [mediaPath, setMediaPath] = useState("HTML media fallback");
   const gap = stream ? timestampInGap(playheadNs, stream.gaps) : undefined;
+
+  useEffect(() => {
+    const codec = stream?.schemaRef.match(
+      /(?:avc1|hvc1|hev1|vp09|av01)[^, ]*/
+    )?.[0];
+    if (!codec) {
+      setMediaPath("HTML media fallback");
+      return;
+    }
+    let active = true;
+    void selectDecoderCapability(codec).then((capability) => {
+      if (active)
+        setMediaPath(
+          capability.mode === "webcodecs"
+            ? "WebCodecs available · HTML fallback active"
+            : "HTML media fallback"
+        );
+    });
+    return () => {
+      active = false;
+    };
+  }, [stream]);
 
   useEffect(() => {
     const element = video.current;
@@ -82,6 +106,7 @@ function MediaPane(
           <h3>{stream.schemaRef}</h3>
         </div>
         <span className={`media-state ${state}`}>{state}</span>
+        <span className="media-path">{mediaPath}</span>
       </div>
       <div className="video-frame">
         <video

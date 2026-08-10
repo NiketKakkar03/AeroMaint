@@ -1,5 +1,5 @@
 {
-  "name": "@aeromaint/playback-core",
+  "name": "@aeromaint/timeline-renderer",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,11 +11,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "lint": "eslint src",
-    "test": "vitest run --passWithNoTests",
+    "lint": "eslint src tests",
+    "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
-  },
-  "dependencies": {
-    "@aeromaint/contracts": "workspace:*"
   }
 }
