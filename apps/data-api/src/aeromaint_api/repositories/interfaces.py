@@ -1,0 +1,35 @@
+from typing import Any, Protocol
+from uuid import UUID
+
+from aeromaint_api.domain.manifest import CaptureSessionManifest
+from aeromaint_api.repositories.models import Annotation, AuditEvent, ImportJob, ImportStatus
+
+
+class SessionRepository(Protocol):
+    async def put(self, manifest: CaptureSessionManifest) -> None: ...
+    async def get(self, session_id: str) -> CaptureSessionManifest | None: ...
+
+
+class ImportRepository(Protocol):
+    async def create(self, idempotency_key: str, source_uri: str) -> tuple[ImportJob, bool]: ...
+    async def get(self, import_id: UUID) -> ImportJob | None: ...
+    async def set_status(
+        self,
+        import_id: UUID,
+        status: ImportStatus,
+        *,
+        session_id: str | None = None,
+        error: dict[str, Any] | None = None,
+    ) -> ImportJob | None: ...
+
+
+class AnnotationRepository(Protocol):
+    async def add(self, annotation: Annotation) -> Annotation: ...
+    async def list_for_session(self, session_id: str) -> list[Annotation]: ...
+
+
+class AuditRepository(Protocol):
+    async def append(
+        self, actor: str, action: str, entity_type: str, entity_id: str, payload: dict[str, Any]
+    ) -> AuditEvent: ...
+    async def list_for_entity(self, entity_type: str, entity_id: str) -> list[AuditEvent]: ...
