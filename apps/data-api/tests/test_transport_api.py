@@ -4,8 +4,10 @@ from fastapi.testclient import TestClient
 from aeromaint_api.domain.fixtures import FIXTURE_SESSION_ID
 from aeromaint_api.domain.transport import BASE_NS, FIXTURE_MEDIA, FIXTURE_TOKEN
 from aeromaint_api.main import app
+from aeromaint_api.security.auth import create_development_token
 
 client = TestClient(app)
+AUTH = {"Authorization": f"Bearer {create_development_token(['viewer'])}"}
 
 
 def _read_arrow(body: bytes) -> pa.Table:
@@ -14,7 +16,8 @@ def _read_arrow(body: bytes) -> pa.Table:
 
 def test_arrow_round_trip_preserves_contract_metadata_nulls_and_int64() -> None:
     response = client.get(
-        f"/v1/sessions/{FIXTURE_SESSION_ID}/streams/imu-main/samples",
+        f"/v1/sessions/{FIXTURE_SESSION_ID}/streams/imu-main/samples/arrow",
+        headers=AUTH,
         params={"start_ns": BASE_NS, "end_ns": BASE_NS + 20_000_000},
     )
 
@@ -32,7 +35,8 @@ def test_arrow_round_trip_preserves_contract_metadata_nulls_and_int64() -> None:
 
 def test_documented_downsampling_preserves_endpoints_and_metadata() -> None:
     response = client.get(
-        f"/v1/sessions/{FIXTURE_SESSION_ID}/streams/imu-main/samples",
+        f"/v1/sessions/{FIXTURE_SESSION_ID}/streams/imu-main/samples/arrow",
+        headers=AUTH,
         params={
             "start_ns": BASE_NS,
             "end_ns": BASE_NS + 200_000_000,
@@ -54,6 +58,7 @@ def test_documented_downsampling_preserves_endpoints_and_metadata() -> None:
 def test_frame_index_exposes_byte_lookup_and_decodable_keyframe_timestamp() -> None:
     response = client.get(
         f"/v1/sessions/{FIXTURE_SESSION_ID}/streams/camera-left/frames",
+        headers=AUTH,
         params={"start_ns": BASE_NS + 100_000_000},
     )
 
@@ -68,7 +73,7 @@ def test_frame_index_exposes_byte_lookup_and_decodable_keyframe_timestamp() -> N
         "decodable_from_ns": str(BASE_NS),
     }
     assert frames[-1]["decodable_from_ns"] == frames[-1]["presentation_ns"]
-    assert client.get(response.request.url).json() == response.json()
+    assert client.get(response.request.url, headers=AUTH).json() == response.json()
 
 
 def test_media_requires_auth_and_honors_ranges_etag_and_immutable_cache() -> None:

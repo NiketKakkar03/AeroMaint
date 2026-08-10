@@ -6,6 +6,9 @@ from fastapi.testclient import TestClient
 from aeromaint_api.api.v1.imports import get_import_repository
 from aeromaint_api.main import app
 from aeromaint_api.repositories import ImportJob, ImportStatus
+from aeromaint_api.security.auth import create_development_token
+
+AUTH = {"Authorization": f"Bearer {create_development_token(['engineer'])}"}
 
 
 class FakeImportRepository:
@@ -37,20 +40,21 @@ def test_import_creation_is_idempotent_and_status_is_exposed() -> None:
         with TestClient(app) as client:
             first = client.post(
                 "/v1/imports",
-                headers={"Idempotency-Key": "upload-1"},
+                headers={**AUTH, "Idempotency-Key": "upload-1"},
                 json={"source_uri": "file:///capture"},
             )
             second = client.post(
                 "/v1/imports",
-                headers={"Idempotency-Key": "upload-1"},
+                headers={**AUTH, "Idempotency-Key": "upload-1"},
                 json={"source_uri": "file:///capture"},
             )
-            fetched = client.get(f"/v1/imports/{first.json()['id']}")
+            fetched = client.get(f"/v1/imports/{first.json()['id']}", headers=AUTH)
     finally:
         app.dependency_overrides.clear()
 
     assert first.status_code == 201
-    assert second.status_code == 200
+    assert second.status_code == 201
+    assert second.headers["Idempotency-Replayed"] == "true"
     assert second.json()["id"] == first.json()["id"]
     assert fetched.json()["status"] == "pending"
 
@@ -58,7 +62,9 @@ def test_import_creation_is_idempotent_and_status_is_exposed() -> None:
 def test_import_requires_idempotency_key() -> None:
     app.dependency_overrides[get_import_repository] = lambda: FakeImportRepository()
     try:
-        response = TestClient(app).post("/v1/imports", json={"source_uri": "file:///capture"})
+        response = TestClient(app).post(
+            "/v1/imports", headers=AUTH, json={"source_uri": "file:///capture"}
+        )
     finally:
         app.dependency_overrides.clear()
-    assert response.status_code == 422
+    assert response.status_code == 400

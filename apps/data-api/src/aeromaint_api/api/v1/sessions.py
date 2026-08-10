@@ -15,6 +15,7 @@ from aeromaint_api.services.playback import (
     select_frame,
     stream_for,
 )
+
 router = APIRouter(
     prefix="/sessions",
     tags=["sessions"],

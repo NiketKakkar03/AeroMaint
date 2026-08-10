@@ -23,9 +23,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     ) -> Response:
         request.state.request_id = request.headers.get("X-Request-ID") or str(uuid4())
         response = await call_next(request)
+        if "Cache-Control" not in response.headers:
+            response.headers["Cache-Control"] = "no-store"
         response.headers.update(
             {
-                "Cache-Control": "no-store",
                 "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
                 "Referrer-Policy": "no-referrer",
                 "X-Content-Type-Options": "nosniff",

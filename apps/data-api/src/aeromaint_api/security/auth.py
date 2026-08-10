@@ -21,6 +21,43 @@ def _decode_segment(segment: str) -> bytes:
         raise _invalid_token() from exc
 
 
+def create_development_token(
+    roles: list[str],
+    *,
+    subject: str = "local-user",
+    expires_in_seconds: int = 300,
+    secret: str | None = None,
+    issuer: str = "aeromaint-local",
+    audience: str = "aeromaint-api",
+) -> str:
+    """Create a short-lived HS256 token for local clients and contract tests."""
+
+    def encode(value: object) -> str:
+        raw = json.dumps(value, separators=(",", ":")).encode()
+        return base64.urlsafe_b64encode(raw).rstrip(b"=").decode()
+
+    header = encode({"alg": "HS256", "typ": "JWT"})
+    payload = encode(
+        {
+            "sub": subject,
+            "roles": roles,
+            "iss": issuer,
+            "aud": audience,
+            "exp": int(time.time()) + expires_in_seconds,
+        }
+    )
+    signing_input = f"{header}.{payload}"
+    signing_secret = secret or "development-only-change-me"
+    signature = (
+        base64.urlsafe_b64encode(
+            hmac.new(signing_secret.encode(), signing_input.encode(), hashlib.sha256).digest()
+        )
+        .rstrip(b"=")
+        .decode()
+    )
+    return f"{signing_input}.{signature}"
+
+
 def _invalid_token(detail: str = "The bearer token is invalid.") -> SecurityError:
     return SecurityError(
         401,

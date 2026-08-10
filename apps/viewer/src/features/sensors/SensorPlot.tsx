@@ -83,7 +83,7 @@ export function SensorPlot({
           </title>
           {gaps.map((gap) => (
             <rect
-              key={`${gap.startNs}-${gap.endNs}`}
+              key={`${String(gap.startNs)}-${String(gap.endNs)}`}
               className="plot-gap"
               x={x(gap.startNs)}
               width={x(gap.endNs) - x(gap.startNs)}

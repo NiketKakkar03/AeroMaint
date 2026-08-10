@@ -4,10 +4,12 @@ from fastapi.testclient import TestClient
 
 from aeromaint_api.domain.fixtures import FIXTURE_MANIFEST, FIXTURE_SESSION_ID
 from aeromaint_api.main import app
+from aeromaint_api.security.auth import create_development_token
 from aeromaint_api.services.playback import InMemorySessionRepository, SessionRecord
 
-client = TestClient(app)
 base = FIXTURE_MANIFEST.start_ns
+AUTH = {"Authorization": f"Bearer {create_development_token(['viewer'])}"}
+client = TestClient(app, headers=AUTH)
 
 
 def test_session_and_stream_cursor_pagination() -> None:

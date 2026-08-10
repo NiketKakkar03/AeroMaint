@@ -32,7 +32,8 @@ describe("sensor plot math", () => {
     expect(
       closestSample([sample(1n), sample(5n), sample(9n)], 7n)?.timeNs
     ).toBe(5n);
-    expect(closestSample([], 7n)).toBeUndefined();
+    const missing = closestSample<VectorSample>([], 7n);
+    expect(missing).toBeUndefined();
   });
 
   it("adds a usable extent for a constant-valued series", () => {

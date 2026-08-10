@@ -1,7 +1,7 @@
 import hmac
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Header, HTTPException, Query, Request, Response, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, Response, status
 from pydantic import BaseModel
 
 from aeromaint_api.domain.fixtures import FIXTURE_SESSION_ID
@@ -11,6 +11,8 @@ from aeromaint_api.domain.transport import (
     FixtureMediaRepository,
     FixtureSensorRepository,
 )
+from aeromaint_api.security.dependencies import require
+from aeromaint_api.security.models import Permission
 from aeromaint_api.services.arrow import build_arrow_window
 from aeromaint_api.services.ranges import InvalidRange, parse_byte_range, strong_etag
 
@@ -29,7 +31,10 @@ def _authorize(authorization: str | None) -> None:
         )
 
 
-@router.get("/streams/{stream_id}/samples")
+@router.get(
+    "/streams/{stream_id}/samples/arrow",
+    dependencies=[Depends(require(Permission.SESSION_READ))],
+)
 def get_sensor_window(
     session_id: str,
     stream_id: str,
@@ -76,7 +81,11 @@ class FrameIndex(BaseModel):
     frames: list[Frame]
 
 
-@router.get("/streams/{stream_id}/frames", response_model=FrameIndex)
+@router.get(
+    "/streams/{stream_id}/frames",
+    response_model=FrameIndex,
+    dependencies=[Depends(require(Permission.SESSION_READ))],
+)
 def get_frame_index(
     session_id: str,
     stream_id: str,

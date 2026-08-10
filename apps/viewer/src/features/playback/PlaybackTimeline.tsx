@@ -64,7 +64,7 @@ export function Timeline({
           return (
             <span
               className={`timeline-gap timeline-gap-${gap.reason}`}
-              key={`${gap.startNs}-${gap.endNs}-${gap.reason}`}
+              key={`${String(gap.startNs)}-${String(gap.endNs)}-${gap.reason}`}
               style={{ left: `${String(left)}%`, width: `${String(width)}%` }}
               title={`${gap.reason.replaceAll("_", " ")} gap`}
             />

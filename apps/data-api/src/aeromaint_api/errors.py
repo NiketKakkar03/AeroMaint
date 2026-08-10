@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
@@ -12,6 +13,7 @@ class ApiProblem(Exception):
     title: str
     detail: str
     extra: dict[str, Any] | None = None
+    headers: Mapping[str, str] | None = None
 
 
 def problem_response(request: Request, problem: ApiProblem) -> JSONResponse:
@@ -28,4 +30,9 @@ def problem_response(request: Request, problem: ApiProblem) -> JSONResponse:
     }
     if problem.extra:
         body.update(problem.extra)
-    return JSONResponse(body, status_code=problem.status, media_type="application/problem+json")
+    return JSONResponse(
+        body,
+        status_code=problem.status,
+        headers=problem.headers,
+        media_type="application/problem+json",
+    )

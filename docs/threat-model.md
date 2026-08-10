@@ -21,16 +21,16 @@ deployment responsibilities; the bundled HS256 issuer is development-only.
 
 ## Threats and controls
 
-| Threat | Control | Residual risk / production requirement |
-| --- | --- | --- |
-| Forged or downgraded JWT | HS256 signature verification and fixed algorithm, issuer, audience, expiry, not-before, subject, and role validation | Replace development issuer with managed asymmetric OIDC validation and key rotation |
-| Privilege escalation | Closed role enum and explicit role-to-permission mapping; handlers name required permission | Review mapping changes as security-sensitive code |
-| Cross-user replay or duplicate mutation | Credential-scoped idempotency records, request fingerprint comparison, and serialized first execution | Use a durable transactional store shared by all API replicas |
-| Brute force or resource exhaustion | Per-principal rate-limiter protocol and bounded in-memory implementation | Enforce IP/edge limits before authentication and use a distributed limiter |
-| Audit deletion or mutation | Append-only sink protocol exposes no update/delete operation | Use durable write-once storage, access controls, retention, integrity signing, and monitoring |
-| Browser injection and framing | Restrictive CSP, no-sniff, deny framing, no-referrer, and no-store headers | Media routes may require a separately reviewed CSP and caching policy |
-| Error-based information disclosure | Stable problem documents and generic token failures | Scrub structured application logs and protect observability access |
-| Stolen signing secret or bearer token | Production refuses the known development secret; tokens require expiry | Store secrets in a manager, use short-lived tokens, TLS, rotation, and revocation strategy |
+| Threat                                  | Control                                                                                                              | Residual risk / production requirement                                                        |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Forged or downgraded JWT                | HS256 signature verification and fixed algorithm, issuer, audience, expiry, not-before, subject, and role validation | Replace development issuer with managed asymmetric OIDC validation and key rotation           |
+| Privilege escalation                    | Closed role enum and explicit role-to-permission mapping; handlers name required permission                          | Review mapping changes as security-sensitive code                                             |
+| Cross-user replay or duplicate mutation | Credential-scoped idempotency records, request fingerprint comparison, and serialized first execution                | Use a durable transactional store shared by all API replicas                                  |
+| Brute force or resource exhaustion      | Per-principal rate-limiter protocol and bounded in-memory implementation                                             | Enforce IP/edge limits before authentication and use a distributed limiter                    |
+| Audit deletion or mutation              | Append-only sink protocol exposes no update/delete operation                                                         | Use durable write-once storage, access controls, retention, integrity signing, and monitoring |
+| Browser injection and framing           | Restrictive CSP, no-sniff, deny framing, no-referrer, and no-store headers                                           | Media routes may require a separately reviewed CSP and caching policy                         |
+| Error-based information disclosure      | Stable problem documents and generic token failures                                                                  | Scrub structured application logs and protect observability access                            |
+| Stolen signing secret or bearer token   | Production refuses the known development secret; tokens require expiry                                               | Store secrets in a manager, use short-lived tokens, TLS, rotation, and revocation strategy    |
 
 ## Interface requirements
 

@@ -12,7 +12,8 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from aeromaint_api.api.v1 import router as v1_router
 from aeromaint_api.config import get_settings
 from aeromaint_api.db import Database, MigrationRunner
-from aeromaint_api.errors import ApiProblem, problem_response as api_problem_response
+from aeromaint_api.errors import ApiProblem
+from aeromaint_api.errors import problem_response as api_problem_response
 from aeromaint_api.repositories import PostgresImportRepository
 from aeromaint_api.security.audit import AuditSink, InMemoryAppendOnlyAuditSink
 from aeromaint_api.security.auth import Authenticator, DevelopmentJwtAuthenticator
@@ -105,7 +106,13 @@ def create_app(
     async def http_error(request: Request, exc: StarletteHTTPException) -> JSONResponse:
         return api_problem_response(
             request,
-            ApiProblem(exc.status_code, "HTTP_ERROR", "HTTP error", str(exc.detail)),
+            ApiProblem(
+                exc.status_code,
+                "HTTP_ERROR",
+                "HTTP error",
+                str(exc.detail),
+                headers=exc.headers,
+            ),
         )
 
     @application.get("/health/live", response_model=HealthResponse, tags=["health"])

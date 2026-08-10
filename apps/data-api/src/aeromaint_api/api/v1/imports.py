@@ -5,8 +5,14 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 
 from aeromaint_api.repositories import ImportJob, PostgresImportRepository
+from aeromaint_api.security.dependencies import require
+from aeromaint_api.security.models import Permission
 
-router = APIRouter(prefix="/imports", tags=["imports"])
+router = APIRouter(
+    prefix="/imports",
+    tags=["imports"],
+    dependencies=[Depends(require(Permission.SESSION_READ))],
+)
 
 
 class CreateImportRequest(BaseModel):
