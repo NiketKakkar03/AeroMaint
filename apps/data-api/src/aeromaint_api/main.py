@@ -12,8 +12,15 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from aeromaint_api.api.v1 import router as v1_router
 from aeromaint_api.config import get_settings
 from aeromaint_api.db import Database, MigrationRunner
+from aeromaint_api.errors import ApiProblem, problem_response as api_problem_response
 from aeromaint_api.repositories import PostgresImportRepository
-from aeromaint_api.errors import ApiProblem, problem_response
+from aeromaint_api.security.audit import AuditSink, InMemoryAppendOnlyAuditSink
+from aeromaint_api.security.auth import Authenticator, DevelopmentJwtAuthenticator
+from aeromaint_api.security.errors import SecurityError
+from aeromaint_api.security.idempotency import IdempotencyStore, InMemoryIdempotencyStore
+from aeromaint_api.security.middleware import IdempotencyMiddleware, SecurityHeadersMiddleware
+from aeromaint_api.security.problems import problem_response as security_problem_response
+from aeromaint_api.security.rate_limit import InMemoryRateLimiter, RateLimiter
 from aeromaint_api.services.playback import InMemorySessionRepository, SessionRepository
 
 
@@ -23,8 +30,21 @@ class HealthResponse(BaseModel):
     environment: str
 
 
-def create_app(repository: SessionRepository | None = None) -> FastAPI:
+def create_app(
+    repository: SessionRepository | None = None,
+    *,
+    authenticator: Authenticator | None = None,
+    audit_sink: AuditSink | None = None,
+    rate_limiter: RateLimiter | None = None,
+    idempotency_store: IdempotencyStore | None = None,
+) -> FastAPI:
     settings = get_settings()
+    if authenticator is None:
+        if settings.env == "production":
+            raise RuntimeError("A production Authenticator implementation must be supplied")
+        authenticator = DevelopmentJwtAuthenticator(
+            settings.jwt_secret, settings.jwt_issuer, settings.jwt_audience
+        )
 
     @asynccontextmanager
     async def lifespan(application: FastAPI) -> AsyncIterator[None]:
@@ -43,6 +63,15 @@ def create_app(repository: SessionRepository | None = None) -> FastAPI:
         lifespan=lifespan,
     )
     application.state.session_repository = repository or InMemorySessionRepository()
+    application.state.authenticator = authenticator
+    application.state.audit_sink = audit_sink or InMemoryAppendOnlyAuditSink()
+    application.state.rate_limiter = rate_limiter or InMemoryRateLimiter(
+        settings.rate_limit_requests, settings.rate_limit_window_seconds
+    )
+    application.add_middleware(
+        IdempotencyMiddleware, store=idempotency_store or InMemoryIdempotencyStore()
+    )
+    application.add_middleware(SecurityHeadersMiddleware)
 
     @application.middleware("http")
     async def request_context(
@@ -57,20 +86,26 @@ def create_app(repository: SessionRepository | None = None) -> FastAPI:
 
     @application.exception_handler(ApiProblem)
     async def handle_problem(request: Request, problem: ApiProblem) -> JSONResponse:
-        return problem_response(request, problem)
+        return api_problem_response(request, problem)
+
+    @application.exception_handler(SecurityError)
+    async def security_error(request: Request, exc: SecurityError) -> JSONResponse:
+        return security_problem_response(
+            request, exc.status, exc.code, exc.title, exc.detail, exc.headers
+        )
 
     @application.exception_handler(RequestValidationError)
-    async def handle_validation(request: Request, error: RequestValidationError) -> JSONResponse:
-        return problem_response(
+    async def validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
+        return api_problem_response(
             request,
-            ApiProblem(422, "INVALID_REQUEST", "Invalid request", str(error)),
+            ApiProblem(422, "INVALID_REQUEST", "Invalid request", str(exc)),
         )
 
     @application.exception_handler(StarletteHTTPException)
-    async def handle_http_error(request: Request, error: StarletteHTTPException) -> JSONResponse:
-        return problem_response(
+    async def http_error(request: Request, exc: StarletteHTTPException) -> JSONResponse:
+        return api_problem_response(
             request,
-            ApiProblem(error.status_code, "HTTP_ERROR", "HTTP error", str(error.detail)),
+            ApiProblem(exc.status_code, "HTTP_ERROR", "HTTP error", str(exc.detail)),
         )
 
     @application.get("/health/live", response_model=HealthResponse, tags=["health"])
@@ -82,7 +117,6 @@ def create_app(repository: SessionRepository | None = None) -> FastAPI:
         return HealthResponse(environment=settings.env)
 
     application.include_router(v1_router)
-
     return application
 
 

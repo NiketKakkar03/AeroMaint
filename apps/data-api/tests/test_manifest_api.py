@@ -1,4 +1,8 @@
+import base64
+import hashlib
+import hmac
 import json
+import time
 from pathlib import Path
 from typing import Any
 
@@ -15,12 +19,39 @@ GOLDEN_FIXTURE = (
 )
 
 
+def auth_headers() -> dict[str, str]:
+    header = {"alg": "HS256", "typ": "JWT"}
+    payload = {
+        "sub": "manifest-test",
+        "roles": ["viewer"],
+        "iss": "aeromaint-local",
+        "aud": "aeromaint-api",
+        "exp": int(time.time()) + 60,
+    }
+
+    def encode(value: object) -> str:
+        raw = json.dumps(value, separators=(",", ":")).encode()
+        return base64.urlsafe_b64encode(raw).rstrip(b"=").decode()
+
+    signing_input = f"{encode(header)}.{encode(payload)}"
+    signature = (
+        base64.urlsafe_b64encode(
+            hmac.new(b"development-only-change-me", signing_input.encode(), hashlib.sha256).digest()
+        )
+        .rstrip(b"=")
+        .decode()
+    )
+    return {"Authorization": f"Bearer {signing_input}.{signature}"}
+
+
 def load_fixture() -> dict[str, Any]:
     return json.loads(GOLDEN_FIXTURE.read_text())
 
 
 def test_fixture_manifest_matches_shared_golden_contract() -> None:
-    response = TestClient(app).get(f"/v1/sessions/{FIXTURE_SESSION_ID}/manifest")
+    response = TestClient(app).get(
+        f"/v1/sessions/{FIXTURE_SESSION_ID}/manifest", headers=auth_headers()
+    )
 
     assert response.status_code == 200
     assert response.json() == load_fixture()
@@ -62,7 +93,7 @@ def test_python_validator_rejects_semantically_invalid_manifests(
 
 
 def test_unknown_session_has_stable_error_code() -> None:
-    response = TestClient(app).get("/v1/sessions/missing/manifest")
+    response = TestClient(app).get("/v1/sessions/missing/manifest", headers=auth_headers())
 
     assert response.status_code == 404
     assert response.headers["content-type"].startswith("application/problem+json")

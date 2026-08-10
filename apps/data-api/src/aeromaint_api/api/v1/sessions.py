@@ -1,10 +1,12 @@
 import hashlib
 from typing import Annotated, Any, Literal, cast
 
-from fastapi import APIRouter, Header, Query, Request, Response
+from fastapi import APIRouter, Depends, Header, Query, Request, Response
 
 from aeromaint_api.domain.manifest import CaptureSessionManifest, CaptureStream
 from aeromaint_api.errors import ApiProblem
+from aeromaint_api.security.dependencies import require
+from aeromaint_api.security.models import Permission
 from aeromaint_api.services.playback import (
     SessionRecord,
     SessionRepository,
@@ -13,8 +15,11 @@ from aeromaint_api.services.playback import (
     select_frame,
     stream_for,
 )
-
-router = APIRouter(prefix="/sessions", tags=["sessions"])
+router = APIRouter(
+    prefix="/sessions",
+    tags=["sessions"],
+    dependencies=[Depends(require(Permission.SESSION_READ))],
+)
 
 Limit = Annotated[int, Query(ge=1, le=100)]
 Timestamp = Annotated[int, Query(ge=-(2**63), le=2**63 - 1)]
