@@ -1,0 +1,23 @@
+{
+  "schema": "aeromaint.viewer-benchmark-config/v1",
+  "durationMs": 1200000,
+  "sampleIntervalMs": 5000,
+  "datasets": [
+    {
+      "name": "synthetic-session",
+      "path": "tests/media-fixtures/synthetic-session",
+      "versionSource": "SHA256SUMS"
+    },
+    {
+      "name": "euroc-mini",
+      "path": "tests/media-fixtures/euroc-mini",
+      "versionSource": "SHA256SUMS"
+    }
+  ],
+  "budgets": {
+    "warmSeekP95Ms": 250,
+    "droppedFrameRate": 0.01,
+    "absoluteDriftP95Ms": 20,
+    "memoryGrowthBytes": 67108864
+  }
+}
