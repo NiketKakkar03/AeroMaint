@@ -1,1 +1,1 @@
-"""Application services and persistence-facing interfaces."""
+"""Application services and persistence-facing transport interfaces."""
