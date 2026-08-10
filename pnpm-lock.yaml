@@ -70,7 +70,7 @@ importers:
   packages/capture-sdk-ts:
     dependencies:
       '@aeromaint/contracts':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../contracts
 
   packages/contracts: {}

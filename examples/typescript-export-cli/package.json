@@ -1,0 +1,17 @@
+{
+  "name": "@aeromaint/typescript-export-cli",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "aeromaint-export": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@aeromaint/capture-sdk": "workspace:*"
+  }
+}

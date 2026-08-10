@@ -1,7 +1,8 @@
 {
   "name": "@aeromaint/capture-sdk",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "TypeScript client for the AeroMaint capture API",
+  "license": "MIT",
   "type": "module",
   "exports": {
     ".": {
@@ -9,6 +10,10 @@
       "default": "./dist/index.js"
     }
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "lint": "eslint src tests",
@@ -16,6 +21,6 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@aeromaint/contracts": "workspace:*"
+    "@aeromaint/contracts": "workspace:^"
   }
 }
