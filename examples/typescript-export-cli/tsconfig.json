@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "dist",
+    "paths": {
+      "@aeromaint/capture-sdk": [
+        "../../packages/capture-sdk-ts/dist/index.d.ts"
+      ]
+    },
+    "rootDir": "src"
+  },
+  "include": ["src"]
+}

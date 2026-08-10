@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS audit_events;
+DROP FUNCTION IF EXISTS reject_audit_mutation();
+DROP TABLE IF EXISTS annotations;
+DROP TABLE IF EXISTS imports;
+DROP TABLE IF EXISTS gaps;
+DROP TABLE IF EXISTS stream_artifacts;
+DROP TABLE IF EXISTS streams;
+DROP TABLE IF EXISTS artifacts;
+DROP TABLE IF EXISTS sessions;
+DELETE FROM schema_migrations WHERE version = 1;
+DROP TABLE IF EXISTS schema_migrations;

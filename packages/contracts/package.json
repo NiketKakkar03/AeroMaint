@@ -1,7 +1,8 @@
 {
   "name": "@aeromaint/contracts",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "Public capture domain contracts for AeroMaint clients",
+  "license": "MIT",
   "type": "module",
   "exports": {
     ".": {
@@ -9,6 +10,9 @@
       "default": "./dist/index.js"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "lint": "eslint src tests",

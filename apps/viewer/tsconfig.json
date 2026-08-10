@@ -3,6 +3,11 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@aeromaint/capture-sdk": ["../../packages/capture-sdk-ts/src/index.ts"],
+      "@aeromaint/observability": ["../../packages/observability/src/index.ts"]
+    },
     "types": ["vite/client"]
   },
   "include": ["src", "vite.config.ts"]

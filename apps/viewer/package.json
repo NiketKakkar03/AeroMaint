@@ -11,7 +11,9 @@
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
+    "@aeromaint/capture-sdk": "workspace:*",
     "@aeromaint/contracts": "workspace:*",
+    "@aeromaint/observability": "workspace:*",
     "@aeromaint/playback-core": "workspace:*",
     "@tanstack/react-query": "^5.83.0",
     "react": "^19.1.1",
