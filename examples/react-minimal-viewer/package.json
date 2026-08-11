@@ -1,0 +1,17 @@
+{
+  "name": "@aeromaint/react-minimal-viewer",
+  "version": "1.0.0",
+  "description": "Minimal React reference consumer for AeroMaint",
+  "license": "MIT",
+  "type": "module",
+  "exports": { ".": { "types": "./dist/App.d.ts", "default": "./dist/App.js" } },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": { "@aeromaint/capture-sdk": "workspace:^" },
+  "peerDependencies": { "react": ">=19", "react-dom": ">=19" },
+  "devDependencies": { "@types/react": "^19.1.9", "@types/react-dom": "^19.1.7", "react": "^19.1.1", "react-dom": "^19.1.1" }
+}

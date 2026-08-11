@@ -278,7 +278,7 @@ function sessionSummary(value: unknown): SessionSummary {
     startNs: timestamp(item.start_ns ?? item.startNs, "Session start_ns"),
     endNs: timestamp(item.end_ns ?? item.endNs, "Session end_ns")
   };
-  const name = optionalString(item.name);
+  const name = optionalString(item.display_name ?? item.name);
   const streamCountValue = item.stream_count ?? item.streamCount;
   return {
     ...result,
@@ -740,6 +740,19 @@ export class CaptureClient {
       data: await response.arrayBuffer(),
       ...(nextCursor === undefined ? {} : { nextCursor })
     };
+  }
+
+  /** Download a manifest-declared media artifact through the authenticated public API. */
+  public async getMediaArtifact(
+    sessionId: string,
+    artifactId: string,
+    options: RequestOptions = {}
+  ): Promise<Blob> {
+    const response = await this.#request(
+      `/v1/sessions/${encodeURIComponent(sessionId)}/media/${encodeURIComponent(artifactId)}`,
+      { signal: options.signal ?? null }
+    );
+    return response.blob();
   }
 
   public async lookupFrame(

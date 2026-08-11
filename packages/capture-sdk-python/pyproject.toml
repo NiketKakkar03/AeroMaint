@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aeromaint-capture-sdk"
+version = "1.0.0"
+description = "Typed Python client for the AeroMaint capture API"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "AeroMaint contributors"}]
+classifiers = ["Typing :: Typed", "Programming Language :: Python :: 3"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+aeromaint_capture = ["py.typed"]
