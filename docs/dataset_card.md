@@ -186,8 +186,15 @@ ignored `data/` or `artifacts/`; do not commit source or derived dataset files.
 
 ### Known limitations
 
-This baseline performs row-level scaling only; it does not construct temporal windows, infer sensor
-units absent from the source schema, correct covariate shift, or model uncertainty. Median imputation
-can hide informative missingness and the capped target changes early-life error weighting. Any model
-built from these artifacts needs separate calibration, out-of-distribution evaluation, subgroup/error
-analysis, and validation on representative operational evidence before any higher-stakes use.
+The issue #23 reference model consumes these row-level features plus cycle. Run it reproducibly with
+`make cmapss-train`; it writes an immutable model, experiment manifest, evaluation report, and model
+card. Selection requires deterministic gradient-boosted stumps to beat both the `RUL_CAP - cycle`
+persistence baseline and cycle-only least-squares regression on validation-engine RMSE. The report
+also records NASA score and RMSE overall, per engine, and in 0–30, 31–60, and 61–125-cycle horizons.
+
+The model requires at least three observations and abstains on missing/non-finite features or values
+outside every training feature range. Its interval is the 90th-percentile absolute validation error,
+and its attribution is the exact additive stump contribution by feature. Neither mechanism makes a
+safety claim: range checks cannot identify every distribution shift, residual intervals are not
+conditionally calibrated, and additive attributions are not causal. FD001 cannot establish accuracy
+on real engines, new conditions, or new faults; representative operational validation is required.
