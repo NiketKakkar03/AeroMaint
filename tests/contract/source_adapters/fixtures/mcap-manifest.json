@@ -56,17 +56,13 @@
       "profile": "ros2",
       "topics": [
         {
-          "frame_ids": [
-            "camera_left_optical"
-          ],
+          "frame_ids": ["camera_left_optical"],
           "name": "/camera/left/image_raw",
           "type": "sensor_msgs/msg/Image",
           "units": {}
         },
         {
-          "frame_ids": [
-            "imu_link"
-          ],
+          "frame_ids": ["imu_link"],
           "name": "/imu/data",
           "type": "sensor_msgs/msg/Imu",
           "units": {
@@ -75,9 +71,7 @@
           }
         },
         {
-          "frame_ids": [
-            "map"
-          ],
+          "frame_ids": ["map"],
           "name": "/localization/pose",
           "type": "geometry_msgs/msg/PoseStamped",
           "units": {
@@ -85,9 +79,7 @@
           }
         },
         {
-          "frame_ids": [
-            "airframe"
-          ],
+          "frame_ids": ["airframe"],
           "name": "/maintenance/events",
           "type": "aeromaint_msgs/msg/Event",
           "units": {}

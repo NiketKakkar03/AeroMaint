@@ -149,7 +149,12 @@ export interface ViewerDataSource {
     sessionId: string,
     id: string
   ): ReturnType<CaptureClient["annotationHistory"]>;
-  createExport(sessionId: string, startNs: bigint, endNs: bigint, format: "arrow" | "json"): Promise<ExportJob>;
+  createExport(
+    sessionId: string,
+    startNs: bigint,
+    endNs: bigint,
+    format: "arrow" | "json"
+  ): Promise<ExportJob>;
   getExport(id: string): Promise<ExportJob>;
   cancelExport(id: string): Promise<ExportJob>;
   exportFileUrl(path: string): string;
@@ -245,9 +250,13 @@ export function createViewerDataSource(
     annotationHistory: (sessionId, id) =>
       client.annotationHistory(sessionId, id),
     createExport: (sessionId, startNs, endNs, sensorFormat) =>
-      client.createExport({ sessionId, startNs, endNs, sensorFormat }, { idempotencyKey: crypto.randomUUID() }),
+      client.createExport(
+        { sessionId, startNs, endNs, sensorFormat },
+        { idempotencyKey: crypto.randomUUID() }
+      ),
     getExport: (id) => client.getExport(id),
-    cancelExport: (id) => client.cancelExport(id, { idempotencyKey: crypto.randomUUID() }),
+    cancelExport: (id) =>
+      client.cancelExport(id, { idempotencyKey: crypto.randomUUID() }),
     exportFileUrl: (path) => `${normalizedBase}${path.replace(/^\/v1/, "/v1")}`,
     mediaSources(sessionId, stream, manifest) {
       const artifact = manifest.artifacts.find((candidate) =>

@@ -22,11 +22,9 @@ export function AnnotationTrack({
   const [duration, setDuration] = useState("1");
   const [error, setError] = useState("");
   const reload = () =>
-    dataSource
-      .listAnnotations(sessionId)
-      .then(setItems, (reason: unknown) => {
-        setError(String(reason));
-      });
+    dataSource.listAnnotations(sessionId).then(setItems, (reason: unknown) => {
+      setError(String(reason));
+    });
   useEffect(() => {
     void reload();
   }, [sessionId, dataSource]);
@@ -95,8 +93,7 @@ export function AnnotationTrack({
               className={`annotation-mark annotation-${item.shape} annotation-${item.status}`}
               style={{
                 left: `${String(left)}%`,
-                width:
-                  item.shape === "point" ? undefined : `${String(width)}%`
+                width: item.shape === "point" ? undefined : `${String(width)}%`
               }}
               aria-label={`${item.kind} ${item.shape}, ${item.status}, version ${String(item.version)}`}
               onClick={() => {

@@ -1,5 +1,9 @@
 import { parseManifest } from "@aeromaint/contracts";
-import type { Annotation, AnnotationDraft } from "@aeromaint/capture-sdk";
+import type {
+  Annotation,
+  AnnotationDraft,
+  ExportJob
+} from "@aeromaint/capture-sdk";
 import type { ViewerDataSource } from "./sdk.js";
 
 const BASE_NS = 9_007_199_254_740_993n;
@@ -117,7 +121,7 @@ export function createSyntheticViewerDataSource(
   sensorSampleCount = 64
 ): ViewerDataSource {
   let annotations: Annotation[] = [];
-  let fixtureExport: import("@aeromaint/capture-sdk").ExportJob | undefined;
+  let fixtureExport: ExportJob | undefined;
   const save = (draft: AnnotationDraft, current?: Annotation) => {
     const now = new Date().toISOString();
     const item: Annotation = {
@@ -188,15 +192,25 @@ export function createSyntheticViewerDataSource(
       ),
     createExport: (sessionId, startNs, endNs, sensorFormat) => {
       fixtureExport = {
-        id: crypto.randomUUID(), sessionId, startNs, endNs,
+        id: crypto.randomUUID(),
+        sessionId,
+        startNs,
+        endNs,
         windowSemantics: "[start_ns,end_ns)",
-        streamIds: manifest.streams.map(({ id }) => id), sensorFormat,
-        status: "succeeded", progress: 1, statusUrl: "/fixture/export",
-        manifestUrl: "/fixture/export/manifest.json", expiresAt: new Date(Date.now() + 86_400_000).toISOString()
+        streamIds: manifest.streams.map(({ id }) => id),
+        sensorFormat,
+        status: "succeeded",
+        progress: 1,
+        statusUrl: "/fixture/export",
+        manifestUrl: "/fixture/export/manifest.json",
+        expiresAt: new Date(Date.now() + 86_400_000).toISOString()
       };
       return Promise.resolve(fixtureExport);
     },
-    getExport: () => fixtureExport ? Promise.resolve(fixtureExport) : Promise.reject(new Error("Export not found")),
+    getExport: () =>
+      fixtureExport
+        ? Promise.resolve(fixtureExport)
+        : Promise.reject(new Error("Export not found")),
     cancelExport: () => {
       if (!fixtureExport) return Promise.reject(new Error("Export not found"));
       fixtureExport = { ...fixtureExport, status: "cancelled", progress: 0 };

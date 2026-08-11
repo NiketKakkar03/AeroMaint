@@ -36,11 +36,29 @@ run(
   [tsc, "-p", join(root, "packages/capture-sdk-ts/tsconfig.json")],
   root
 );
-run(
-  process.execPath,
-  [tsc, "-p", join(root, "examples/react-minimal-viewer/tsconfig.json")],
-  root
+const exampleBuildConfig = join(clean, "example-tsconfig.json");
+writeFileSync(
+  exampleBuildConfig,
+  JSON.stringify({
+    extends: join(root, "tsconfig.base.json"),
+    compilerOptions: {
+      outDir: join(root, "examples/react-minimal-viewer/dist"),
+      rootDir: join(root, "examples/react-minimal-viewer/src"),
+      declaration: true,
+      jsx: "react-jsx",
+      baseUrl: root,
+      paths: {
+        "@aeromaint/capture-sdk": ["packages/capture-sdk-ts/dist/index.d.ts"],
+        react: ["apps/viewer/node_modules/@types/react/index.d.ts"],
+        "react/jsx-runtime": [
+          "apps/viewer/node_modules/@types/react/jsx-runtime.d.ts"
+        ]
+      }
+    },
+    include: [join(root, "examples/react-minimal-viewer/src")]
+  })
 );
+run(process.execPath, [tsc, "-p", exampleBuildConfig], root);
 
 function pack(source, files, dependencies = {}, peerDependencies = undefined) {
   const manifest = JSON.parse(
@@ -76,7 +94,7 @@ run(
   "npm",
   [
     "pack",
-    join(root, "examples/react-minimal-viewer/node_modules/react"),
+    join(root, "apps/viewer/node_modules/react"),
     "--pack-destination",
     clean
   ],

@@ -1,12 +1,7 @@
 import type { TimestampNs } from "@aeromaint/contracts";
 
 export type ExportStatus =
-  | "pending"
-  | "running"
-  | "succeeded"
-  | "failed"
-  | "cancelled"
-  | "expired";
+  "pending" | "running" | "succeeded" | "failed" | "cancelled" | "expired";
 
 export interface ExportRequest {
   readonly sessionId: string;
@@ -44,7 +39,9 @@ function object(value: unknown): Record<string, unknown> {
 
 export function exportBody(value: ExportRequest): Record<string, unknown> {
   if (value.endNs <= value.startNs)
-    throw new RangeError("endNs must be greater than startNs; window is half-open");
+    throw new RangeError(
+      "endNs must be greater than startNs; window is half-open"
+    );
   return {
     session_id: value.sessionId,
     start_ns: value.startNs.toString(),

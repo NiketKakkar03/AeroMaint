@@ -1,4 +1,5 @@
 """Build reproducible wheel and sdist artifacts using only the Python standard library."""
+
 from __future__ import annotations
 
 import base64
@@ -35,19 +36,33 @@ def build(out: Path) -> None:
         f"aeromaint_capture/{path.name}": path.read_bytes() for path in sources if path.is_file()
     }
     wheel_files[f"{DIST_INFO}/METADATA"] = METADATA.encode()
-    wheel_files[f"{DIST_INFO}/WHEEL"] = b"Wheel-Version: 1.0\nGenerator: aeromaint-stdlib-builder\nRoot-Is-Purelib: true\nTag: py3-none-any\n"
+    wheel_files[f"{DIST_INFO}/WHEEL"] = (
+        b"Wheel-Version: 1.0\n"
+        b"Generator: aeromaint-stdlib-builder\n"
+        b"Root-Is-Purelib: true\n"
+        b"Tag: py3-none-any\n"
+    )
     records = [[name, *digest(data)] for name, data in wheel_files.items()]
     records.append([f"{DIST_INFO}/RECORD", "", ""])
-    record = io.StringIO(); csv.writer(record, lineterminator="\n").writerows(records)
+    record = io.StringIO()
+    csv.writer(record, lineterminator="\n").writerows(records)
     wheel_files[f"{DIST_INFO}/RECORD"] = record.getvalue().encode()
-    with zipfile.ZipFile(out / f"{NAME}-{VERSION}-py3-none-any.whl", "w", zipfile.ZIP_DEFLATED) as archive:
+    with zipfile.ZipFile(
+        out / f"{NAME}-{VERSION}-py3-none-any.whl", "w", zipfile.ZIP_DEFLATED
+    ) as archive:
         for name, data in wheel_files.items():
-            info = zipfile.ZipInfo(name, (2020, 1, 1, 0, 0, 0)); info.compress_type = zipfile.ZIP_DEFLATED
+            info = zipfile.ZipInfo(name, (2020, 1, 1, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_DEFLATED
             archive.writestr(info, data)
 
     prefix = f"aeromaint_capture_sdk-{VERSION}"
     with tarfile.open(out / f"{prefix}.tar.gz", "w:gz", format=tarfile.PAX_FORMAT) as archive:
-        for path in [ROOT / "pyproject.toml", ROOT / "README.md", ROOT / "build_artifacts.py", *sources]:
+        for path in [
+            ROOT / "pyproject.toml",
+            ROOT / "README.md",
+            ROOT / "build_artifacts.py",
+            *sources,
+        ]:
             archive.add(path, arcname=f"{prefix}/{path.relative_to(ROOT)}")
 
 

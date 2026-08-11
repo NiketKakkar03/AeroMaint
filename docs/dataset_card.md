@@ -76,12 +76,12 @@ unless its producer, calibration, timing, and operating context have been indepe
 The current dependency-free reader accepts deterministic, **unchunked** MCAP files with the `ros2`
 profile, `ros2msg` schemas, and little-endian `cdr` messages for:
 
-| ROS 2 type | Canonical kind | Preserved evidence |
-| --- | --- | --- |
-| `sensor_msgs/msg/Image` | `video` | topic, encoding, dimensions, step, frame ID, source and canonical times |
-| `sensor_msgs/msg/Imu` | `imu` | topic, frame ID, covariance, `rad/s` and `m/s²` units, source and canonical times |
-| `geometry_msgs/msg/PoseStamped` | `pose` | topic, frame ID, metre units, source and canonical times |
-| `aeromaint_msgs/msg/Event` | `event` | topic, frame ID, severity, message, source and canonical times |
+| ROS 2 type                      | Canonical kind | Preserved evidence                                                                |
+| ------------------------------- | -------------- | --------------------------------------------------------------------------------- |
+| `sensor_msgs/msg/Image`         | `video`        | topic, encoding, dimensions, step, frame ID, source and canonical times           |
+| `sensor_msgs/msg/Imu`           | `imu`          | topic, frame ID, covariance, `rad/s` and `m/s²` units, source and canonical times |
+| `geometry_msgs/msg/PoseStamped` | `pose`         | topic, frame ID, metre units, source and canonical times                          |
+| `aeromaint_msgs/msg/Event`      | `event`        | topic, frame ID, severity, message, source and canonical times                    |
 
 The earliest ROS publish timestamp becomes the source clock epoch and maps exactly to canonical
 session time zero at a 1:1 rate. Original publish and log timestamps remain in canonical artifacts.

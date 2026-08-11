@@ -4,13 +4,21 @@ import json
 import time
 from collections.abc import Callable, Iterator, Mapping
 from threading import Event
-from typing import Any
+from typing import Any, cast
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
 from .errors import CaptureError, CaptureHttpError, CaptureTransportError, Problem
-from .models import ImuSample, ImuWindow, Page, SensorSample, SensorWindow, SessionSummary, StreamSummary
+from .models import (
+    ImuSample,
+    ImuWindow,
+    Page,
+    SensorSample,
+    SensorWindow,
+    SessionSummary,
+    StreamSummary,
+)
 
 Open = Callable[..., Any]
 
@@ -32,7 +40,9 @@ class CaptureClient:
         if not base_url.startswith(("http://", "https://")):
             raise ValueError("base_url must be an HTTP(S) URL")
         if timeout <= 0 or max_attempts < 1 or backoff < 0:
-            raise ValueError("timeout and max_attempts must be positive; backoff cannot be negative")
+            raise ValueError(
+                "timeout and max_attempts must be positive; backoff cannot be negative"
+            )
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self.max_attempts = max_attempts
@@ -56,7 +66,9 @@ class CaptureClient:
                 ) as response:
                     value = json.load(response)
                     if not isinstance(value, dict):
-                        raise CaptureError("API response must be an object", code="INVALID_RESPONSE")
+                        raise CaptureError(
+                            "API response must be an object", code="INVALID_RESPONSE"
+                        )
                     return value
             except HTTPError as error:
                 problem = self._problem(error)
@@ -77,7 +89,7 @@ class CaptureClient:
         raise last or AssertionError("unreachable")
 
     def _delay(self, attempt: int) -> float:
-        return self.backoff * (2**attempt)
+        return float(self.backoff * (2**attempt))
 
     @staticmethod
     def _wait(delay: float, cancel: Event | None) -> None:
@@ -107,8 +119,11 @@ class CaptureClient:
         return Page(
             tuple(
                 SessionSummary(
-                    id=str(item["id"]), start_ns=int(item["start_ns"]), end_ns=int(item["end_ns"]),
-                    display_name=item.get("display_name"), stream_count=item.get("stream_count"),
+                    id=str(item["id"]),
+                    start_ns=int(item["start_ns"]),
+                    end_ns=int(item["end_ns"]),
+                    display_name=item.get("display_name"),
+                    stream_count=item.get("stream_count"),
                     created_at=item.get("created_at"),
                 )
                 for item in raw.get("items", [])
@@ -124,7 +139,9 @@ class CaptureClient:
         cursor = None
         emitted = 0
         while emitted < max_items:
-            page = self.list_sessions(cursor=cursor, limit=min(page_size, max_items-emitted), cancel=cancel)
+            page = self.list_sessions(
+                cursor=cursor, limit=min(page_size, max_items - emitted), cancel=cancel
+            )
             for item in page.items:
                 yield item
                 emitted += 1
@@ -133,49 +150,99 @@ class CaptureClient:
             cursor = page.next_cursor
 
     def list_streams(
-        self, session_id: str, *, cursor: str | None = None, limit: int = 50,
+        self,
+        session_id: str,
+        *,
+        cursor: str | None = None,
+        limit: int = 50,
         cancel: Event | None = None,
     ) -> Page[StreamSummary]:
         self._validate_limit(limit)
-        raw = self._get(self._path(f"/v1/sessions/{quote(session_id, safe='')}/streams", cursor=cursor, limit=limit), cancel)
-        return Page(tuple(StreamSummary(
-            id=str(item["id"]), kind=str(item["kind"]), start_ns=int(item["start_ns"]),
-            end_ns=int(item["end_ns"]), schema_ref=item.get("schema_ref")
-        ) for item in raw.get("items", [])), raw.get("next_cursor"))
+        raw = self._get(
+            self._path(
+                f"/v1/sessions/{quote(session_id, safe='')}/streams", cursor=cursor, limit=limit
+            ),
+            cancel,
+        )
+        return Page(
+            tuple(
+                StreamSummary(
+                    id=str(item["id"]),
+                    kind=str(item["kind"]),
+                    start_ns=int(item["start_ns"]),
+                    end_ns=int(item["end_ns"]),
+                    schema_ref=item.get("schema_ref"),
+                )
+                for item in raw.get("items", [])
+            ),
+            raw.get("next_cursor"),
+        )
 
     def get_sensor_window(
-        self, session_id: str, stream_id: str, *, start_ns: int, end_ns: int,
-        cursor: str | None = None, limit: int = 100, cancel: Event | None = None,
+        self,
+        session_id: str,
+        stream_id: str,
+        *,
+        start_ns: int,
+        end_ns: int,
+        cursor: str | None = None,
+        limit: int = 100,
+        cancel: Event | None = None,
     ) -> SensorWindow:
         if start_ns >= end_ns:
             raise ValueError("end_ns must be greater than start_ns; windows are [start_ns,end_ns)")
         self._validate_limit(limit)
-        raw = self._get(self._path(
-            f"/v1/sessions/{quote(session_id, safe='')}/streams/{quote(stream_id, safe='')}/samples",
-            start_ns=start_ns, end_ns=end_ns, cursor=cursor, limit=limit,
-        ), cancel)
+        raw = self._get(
+            self._path(
+                f"/v1/sessions/{quote(session_id, safe='')}"
+                f"/streams/{quote(stream_id, safe='')}/samples",
+                start_ns=start_ns,
+                end_ns=end_ns,
+                cursor=cursor,
+                limit=limit,
+            ),
+            cancel,
+        )
         window = raw.get("range", {})
         return SensorWindow(
-            session_id=session_id, stream_id=stream_id,
-            start_ns=int(window.get("start_ns", start_ns)), end_ns=int(window.get("end_ns", end_ns)),
-            samples=tuple(SensorSample(int(item["timestamp_ns"]), dict(item["values"])) for item in raw.get("items", [])),
-            schema_ref=raw.get("schema_ref"), next_cursor=raw.get("next_cursor"),
+            session_id=session_id,
+            stream_id=stream_id,
+            start_ns=int(window.get("start_ns", start_ns)),
+            end_ns=int(window.get("end_ns", end_ns)),
+            samples=tuple(
+                SensorSample(int(item["timestamp_ns"]), dict(item["values"]))
+                for item in raw.get("items", [])
+            ),
+            schema_ref=raw.get("schema_ref"),
+            next_cursor=raw.get("next_cursor"),
             downsampled=bool(raw.get("downsampling", {}).get("applied", False)),
         )
 
     def get_imu_window(
-        self, session_id: str, stream_id: str, *, start_ns: int, end_ns: int,
-        cursor: str | None = None, limit: int = 100, cancel: Event | None = None,
+        self,
+        session_id: str,
+        stream_id: str,
+        *,
+        start_ns: int,
+        end_ns: int,
+        cursor: str | None = None,
+        limit: int = 100,
+        cancel: Event | None = None,
     ) -> ImuWindow:
         """Return a typed IMU window while retaining any additive wire fields."""
         window = self.get_sensor_window(
-            session_id, stream_id, start_ns=start_ns, end_ns=end_ns,
-            cursor=cursor, limit=limit, cancel=cancel,
+            session_id,
+            stream_id,
+            start_ns=start_ns,
+            end_ns=end_ns,
+            cursor=cursor,
+            limit=limit,
+            cancel=cancel,
         )
         samples: list[ImuSample] = []
         for sample in window.samples:
             try:
-                ax, ay, az = (float(sample.values[key]) for key in ("ax", "ay", "az"))
+                ax, ay, az = (float(cast(Any, sample.values[key])) for key in ("ax", "ay", "az"))
             except (KeyError, TypeError, ValueError) as error:
                 raise CaptureError(
                     "IMU sample values must contain numeric ax, ay, and az",
@@ -183,8 +250,14 @@ class CaptureClient:
                 ) from error
             samples.append(ImuSample(sample.timestamp_ns, ax, ay, az, sample.values))
         return ImuWindow(
-            window.session_id, window.stream_id, window.start_ns, window.end_ns,
-            tuple(samples), window.schema_ref, window.next_cursor, window.downsampled,
+            window.session_id,
+            window.stream_id,
+            window.start_ns,
+            window.end_ns,
+            tuple(samples),
+            window.schema_ref,
+            window.next_cursor,
+            window.downsampled,
         )
 
     @staticmethod
