@@ -1,0 +1,1 @@
+"""Approved-document ingestion pipeline."""

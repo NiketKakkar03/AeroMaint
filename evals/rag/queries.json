@@ -1,0 +1,4 @@
+[
+  {"query": "turbofan degradation prognostics", "expected_title": "NASA C-MAPSS turbofan degradation simulation"},
+  {"query": "authorized maintenance approval", "expected_title": "FAA AC 43.13-1B"}
+]

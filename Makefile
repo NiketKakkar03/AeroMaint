@@ -1,4 +1,4 @@
-.PHONY: bootstrap dev check test euroc-download euroc-verify euroc-fixture-check cmapss-acquire cmapss-prepare cmapss-train up-core down
+.PHONY: bootstrap dev check test euroc-download euroc-verify euroc-fixture-check cmapss-acquire cmapss-prepare cmapss-train rag-index up-core down
 
 bootstrap:
 	pnpm install
@@ -51,6 +51,10 @@ cmapss-train:
 	uv run python scripts/train_rul.py \
 		--dataset "$(or $(CMAPSS_DEST),artifacts/datasets/cmapss-fd001)" \
 		--output "$(or $(RUL_OUTPUT),artifacts/models/cmapss-rul)"
+
+rag-index:
+	@test -n "$(RAG_MANIFEST)" || (echo "RAG_MANIFEST is required" >&2; exit 2)
+	uv run python -c 'from pathlib import Path; from pipelines.documents.index import build_from_manifest; build_from_manifest(Path("$(RAG_MANIFEST)"), Path("$(or $(RAG_INDEX),artifacts/retrieval/index.json)"))'
 
 up-core:
 	docker compose --profile core up --build

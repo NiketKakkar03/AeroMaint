@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0.0",
+  "tools": [
+    "sessions.get",
+    "predictions.get",
+    "documents.search",
+    "annotations.create_draft",
+    "exports.create"
+  ],
+  "prohibitedTools": ["recommendations.approve"]
+}
