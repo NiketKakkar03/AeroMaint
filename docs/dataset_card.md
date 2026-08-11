@@ -108,3 +108,86 @@ uv run python scripts/generate_mcap_fixture.py
 The fixture and EuRoC source run through the shared adapter conformance suite in
 `tests/contract/source_adapters/test_conformance.py`, including canonical consumer validation and an
 MCAP golden-manifest comparison.
+
+## NASA C-MAPSS FD001
+
+### Selection and intended use
+
+FD001 contains simulated run-to-failure turbofan trajectories under one operating condition and one
+fault mode. AeroMaint uses its training trajectories as a reproducible baseline for remaining useful
+life (RUL) research and pipeline testing. It is not flight data and must not be used to make aircraft
+maintenance, airworthiness, or safety decisions. Results on FD001 do not establish performance on
+other C-MAPSS subsets, real engines, unseen operating conditions, or unseen fault modes.
+
+The repository does not redistribute the dataset. Users are responsible for obtaining it from an
+authorized NASA source, retaining its accompanying readme and license/terms, and recording the exact
+archive SHA-256 used by their experiment.
+
+### Input schema and labels
+
+`train_FD001.txt` is parsed as whitespace-delimited rows with exactly 26 fields: engine/unit ID,
+cycle, three operating settings, and sensors 1 through 21. IDs and cycles must be positive integers;
+cycles must strictly increase within an engine. Non-finite sensor/setting values become explicit
+missing values. Other column-count, numeric, or ordering errors reject the source.
+
+Each engine's last observed training cycle is treated as failure. The label is
+`min(RUL_CAP, last_cycle - cycle)`; the default cap is 125 cycles. This piecewise-linear target is a
+modeling assumption, not a measured maintenance outcome. Raw test trajectories and the separate NASA
+test-RUL file are intentionally outside this baseline: all three development partitions are made
+from complete training trajectories so labels have identical semantics.
+
+### Leakage controls and preprocessing
+
+Engines, never rows or windows, are assigned deterministically to train, validation, and test using
+SHA-256 ordering of a recorded split seed. The manifest records the complete engine lists, and the
+pipeline checks that each engine has exactly one owner. Change the seed or fractions to create a new
+data version.
+
+Medians, means, variances, missingness decisions, and constant-feature decisions are fitted only on
+training engines. Missing values are replaced with that feature's training median. A feature missing
+for every training row is rejected because it has no defensible imputation value. Features with zero
+training variance are recorded and dropped; all remaining settings and sensors are standardized with
+population statistics from training rows. Validation/test values never affect fitted state.
+
+### Reproducibility and artifacts
+
+Run against a locally approved source:
+
+```bash
+make cmapss-prepare CMAPSS_SOURCE=/path/to/train_FD001.txt \
+  CMAPSS_DEST=artifacts/datasets/cmapss-fd001
+```
+
+Optional acquisition is deliberately separate and has no built-in URL or trusted digest:
+
+```bash
+make cmapss-acquire CMAPSS_URL=<approved-archive-url> \
+  CMAPSS_SHA256=<trusted-64-character-digest> \
+  CMAPSS_SOURCE=data/cmapss/train_FD001.txt
+```
+
+Acquisition verifies the supplied SHA-256 before reading the ZIP, rejects unsafe paths, and requires
+exactly one `train_FD001.txt`. Preparing a pre-existing local file requires no network access.
+
+The output directory is published atomically and is never silently overwritten. It contains:
+
+| Artifact                                              | Contents                                                                                         |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `raw.parquet`                                         | Typed, parsed settings and sensor evidence before imputation                                     |
+| `train.parquet`, `validation.parquet`, `test.parquet` | Standardized features, engine/cycle identity, split, and capped RUL                              |
+| `transform.json`                                      | Transform schema version, training engines, medians, means, scales, and dropped constants        |
+| `manifest.json`                                       | Source digest, split/configuration, format/data/feature versions, policies, and feature checksum |
+
+The data version hashes the source digest, labeling and split configuration, engine assignments,
+transform digest, and deterministic feature checksum. The feature version combines the named
+transform contract with its serialized-state digest. Parquet schema metadata repeats source, data,
+format, and feature versions so detached tables remain identifiable. Generated data belongs under
+ignored `data/` or `artifacts/`; do not commit source or derived dataset files.
+
+### Known limitations
+
+This baseline performs row-level scaling only; it does not construct temporal windows, infer sensor
+units absent from the source schema, correct covariate shift, or model uncertainty. Median imputation
+can hide informative missingness and the capped target changes early-life error weighting. Any model
+built from these artifacts needs separate calibration, out-of-distribution evaluation, subgroup/error
+analysis, and validation on representative operational evidence before any higher-stakes use.

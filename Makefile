@@ -1,4 +1,4 @@
-.PHONY: bootstrap dev check test euroc-download euroc-verify euroc-fixture-check up-core down
+.PHONY: bootstrap dev check test euroc-download euroc-verify euroc-fixture-check cmapss-acquire cmapss-prepare up-core down
 
 bootstrap:
 	pnpm install
@@ -35,6 +35,17 @@ euroc-verify:
 
 euroc-fixture-check:
 	uv run python scripts/download_euroc.py verify-fixture tests/media-fixtures/euroc-mini
+
+cmapss-acquire:
+	@test -n "$(CMAPSS_URL)" || (echo "CMAPSS_URL is required" >&2; exit 2)
+	@test -n "$(CMAPSS_SHA256)" || (echo "CMAPSS_SHA256 is required" >&2; exit 2)
+	uv run python scripts/prepare_cmapss.py acquire --url "$(CMAPSS_URL)" \
+		--sha256 "$(CMAPSS_SHA256)" --output "$(or $(CMAPSS_SOURCE),data/cmapss/train_FD001.txt)"
+
+cmapss-prepare:
+	@test -n "$(CMAPSS_SOURCE)" || (echo "CMAPSS_SOURCE is required" >&2; exit 2)
+	uv run python scripts/prepare_cmapss.py prepare --source "$(CMAPSS_SOURCE)" \
+		--destination "$(or $(CMAPSS_DEST),artifacts/datasets/cmapss-fd001)"
 
 up-core:
 	docker compose --profile core up --build

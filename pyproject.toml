@@ -44,7 +44,7 @@ mypy_path = ["apps/data-api/src", "apps/worker/src", "."]
 [tool.pytest.ini_options]
 addopts = "--strict-config --strict-markers --cov=aeromaint_api --cov-report=term-missing"
 pythonpath = [".", "apps/data-api/src", "apps/worker/src"]
-testpaths = ["apps/data-api/tests", "tests/contract", "tests/integration"]
+testpaths = ["apps/data-api/tests", "tests/contract", "tests/integration", "tests/ml"]
 
 [tool.coverage.run]
 branch = true
