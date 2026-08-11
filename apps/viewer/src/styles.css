@@ -73,6 +73,15 @@ h1 {
 section {
   padding: 80px 0;
 }
+.annotation-panel { padding: 40px 0; }
+.annotation-track { position: relative; height: 58px; overflow: hidden; border: 1px solid #385157; border-radius: 7px; background: #0c1618; }
+.annotation-mark { position: absolute; top: 12px; height: 32px; min-width: 5px; padding: 0; border: 1px solid #69e2ba; border-radius: 4px; background: #347d68aa; cursor: pointer; }
+.annotation-point { width: 5px; transform: translateX(-2px); }
+.annotation-approved { border-color: #7be7a8; background: #27834f; }
+.annotation-rejected { border-color: #ff7d72; background: #8b332d; }
+.annotation-editor { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; padding-top: 16px; }
+.annotation-editor label { display: grid; gap: 6px; color: #92a6ac; font-size: 12px; }
+.annotation-editor input, .annotation-editor select, .annotation-editor button { min-height: 38px; padding: 7px 10px; color: #d8e3e7; border: 1px solid #385157; border-radius: 6px; background: #101c1f; }
 .section-heading {
   display: flex;
   align-items: end;

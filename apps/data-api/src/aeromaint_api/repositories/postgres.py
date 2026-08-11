@@ -136,11 +136,12 @@ class PostgresAnnotationRepository:
     def __init__(self, database: Database) -> None:
         self.database = database
 
-    async def add(self, annotation: Annotation) -> Annotation:
+    async def create(self, annotation: Annotation) -> Annotation:
         async with self.database.connection() as connection, connection.transaction():
             cursor = await connection.execute(
-                """INSERT INTO annotations(id,session_id,stream_id,start_ns,end_ns,kind,payload)
-                VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING *""",
+                """INSERT INTO annotations
+                (id,session_id,stream_id,start_ns,end_ns,kind,payload,version,status,actor,provenance)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING *""",
                 (
                     annotation.id,
                     annotation.session_id,
@@ -149,10 +150,54 @@ class PostgresAnnotationRepository:
                     annotation.end_ns,
                     annotation.kind,
                     Jsonb(annotation.payload),
+                    annotation.version,
+                    annotation.status,
+                    annotation.actor,
+                    Jsonb(annotation.provenance),
                 ),
             )
             row = await cursor.fetchone()
+            await self._audit(connection, annotation, "annotation.created")
         return Annotation.model_validate(row)
+
+    async def get(self, annotation_id: UUID) -> Annotation | None:
+        async with self.database.connection() as connection:
+            cursor = await connection.execute(
+                "SELECT * FROM annotations WHERE id=%s", (annotation_id,)
+            )
+            row = await cursor.fetchone()
+        return None if row is None else Annotation.model_validate(row)
+
+    async def update(self, annotation: Annotation, expected_version: int) -> Annotation | None:
+        async with self.database.connection() as connection, connection.transaction():
+            cursor = await connection.execute(
+                """UPDATE annotations SET stream_id=%s,start_ns=%s,end_ns=%s,kind=%s,payload=%s,
+                version=%s,status=%s,actor=%s,provenance=%s,updated_at=%s
+                WHERE id=%s AND version=%s RETURNING *""",
+                (
+                    annotation.stream_id,
+                    annotation.start_ns,
+                    annotation.end_ns,
+                    annotation.kind,
+                    Jsonb(annotation.payload),
+                    annotation.version,
+                    annotation.status,
+                    annotation.actor,
+                    Jsonb(annotation.provenance),
+                    annotation.updated_at,
+                    annotation.id,
+                    expected_version,
+                ),
+            )
+            row = await cursor.fetchone()
+            if row is not None:
+                action = (
+                    "annotation.reviewed"
+                    if annotation.status in {"approved", "rejected"}
+                    else "annotation.updated"
+                )
+                await self._audit(connection, annotation, action)
+        return None if row is None else Annotation.model_validate(row)
 
     async def list_for_session(self, session_id: str) -> list[Annotation]:
         async with self.database.connection() as connection:
@@ -162,6 +207,35 @@ class PostgresAnnotationRepository:
             )
             rows = await cursor.fetchall()
         return [Annotation.model_validate(row) for row in rows]
+
+    async def history(self, annotation_id: UUID) -> list[AuditEvent]:
+        async with self.database.connection() as connection:
+            cursor = await connection.execute(
+                """SELECT * FROM audit_events WHERE entity_type='annotation' AND entity_id=%s
+                ORDER BY occurred_at,id""",
+                (str(annotation_id),),
+            )
+            rows = await cursor.fetchall()
+        return [AuditEvent.model_validate(row) for row in rows]
+
+    @staticmethod
+    async def _audit(connection: Any, annotation: Annotation, action: str) -> None:
+        await connection.execute(
+            """INSERT INTO audit_events(actor,action,entity_type,entity_id,payload)
+            VALUES (%s,%s,'annotation',%s,%s)""",
+            (
+                annotation.actor,
+                action,
+                str(annotation.id),
+                Jsonb(
+                    {
+                        "version": annotation.version,
+                        "status": annotation.status,
+                        "snapshot": annotation.model_dump(mode="json"),
+                    }
+                ),
+            ),
+        )
 
 
 class PostgresAuditRepository:

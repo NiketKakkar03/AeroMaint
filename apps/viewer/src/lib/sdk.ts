@@ -1,5 +1,11 @@
 import { CaptureClient } from "@aeromaint/capture-sdk";
 import type {
+  Annotation,
+  AnnotationDraft,
+  AnnotationReview,
+  AnnotationUpdate
+} from "@aeromaint/capture-sdk";
+import type {
   CaptureSessionManifest,
   CaptureStream
 } from "@aeromaint/contracts";
@@ -120,6 +126,28 @@ export interface ViewerDataSource {
     endNs: bigint,
     signal?: AbortSignal
   ): Promise<readonly VectorSample[]>;
+  listAnnotations(
+    sessionId: string,
+    signal?: AbortSignal
+  ): Promise<readonly Annotation[]>;
+  createAnnotation(
+    sessionId: string,
+    draft: AnnotationDraft
+  ): Promise<Annotation>;
+  updateAnnotation(
+    sessionId: string,
+    id: string,
+    update: AnnotationUpdate
+  ): Promise<Annotation>;
+  reviewAnnotation(
+    sessionId: string,
+    id: string,
+    review: AnnotationReview
+  ): Promise<Annotation>;
+  annotationHistory(
+    sessionId: string,
+    id: string
+  ): ReturnType<CaptureClient["annotationHistory"]>;
 }
 
 interface SessionListItem {
@@ -195,6 +223,22 @@ export function createViewerDataSource(
     },
     getSessionManifest: (sessionId, signal) =>
       client.getSessionManifest(sessionId, signal),
+    listAnnotations: (sessionId, signal) =>
+      client.listAnnotations(sessionId, signal ? { signal } : {}),
+    createAnnotation: (sessionId, draft) =>
+      client.createAnnotation(sessionId, draft, {
+        idempotencyKey: crypto.randomUUID()
+      }),
+    updateAnnotation: (sessionId, id, update) =>
+      client.updateAnnotation(sessionId, id, update, {
+        idempotencyKey: crypto.randomUUID()
+      }),
+    reviewAnnotation: (sessionId, id, review) =>
+      client.reviewAnnotation(sessionId, id, review, {
+        idempotencyKey: crypto.randomUUID()
+      }),
+    annotationHistory: (sessionId, id) =>
+      client.annotationHistory(sessionId, id),
     mediaSources(sessionId, stream, manifest) {
       const artifact = manifest.artifacts.find((candidate) =>
         stream.artifactIds.includes(candidate.id)

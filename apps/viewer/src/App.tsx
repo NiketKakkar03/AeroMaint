@@ -17,6 +17,7 @@ import { downloadBenchmarkReport } from "./features/diagnostics/reportExport.js"
 import { PlaybackControls } from "./features/playback/PlaybackControls.js";
 import { Timeline } from "./features/playback/PlaybackTimeline.js";
 import { SensorPlot } from "./features/sensors/SensorPlot.js";
+import { AnnotationTrack } from "./features/annotations/index.js";
 import type { VectorSample } from "./features/sensors/sensorMath.js";
 import { sensorWindow } from "./features/sensors/sensorWindow.js";
 import {
@@ -299,6 +300,13 @@ function SessionViewer({
             nowNs: nowNs()
           });
         }}
+      />
+      <AnnotationTrack
+        sessionId={manifest.sessionId}
+        startNs={visibleWindow.visibleStartNs}
+        endNs={visibleWindow.visibleEndNs}
+        playheadNs={playback.currentTimeNs}
+        dataSource={dataSource}
       />
       {sensorStreams.map((stream) => {
         const track = sensorTracks[stream.id];

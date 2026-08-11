@@ -1,4 +1,5 @@
 import { parseManifest } from "@aeromaint/contracts";
+import type { Annotation, AnnotationDraft } from "@aeromaint/capture-sdk";
 import type { ViewerDataSource } from "./sdk.js";
 
 const BASE_NS = 9_007_199_254_740_993n;
@@ -115,12 +116,75 @@ export function createSyntheticViewerDataSource(
   workerMedia = false,
   sensorSampleCount = 64
 ): ViewerDataSource {
+  let annotations: Annotation[] = [];
+  const save = (draft: AnnotationDraft, current?: Annotation) => {
+    const now = new Date().toISOString();
+    const item: Annotation = {
+      id: current?.id ?? crypto.randomUUID(),
+      sessionId: manifest.sessionId,
+      ...(draft.streamId === undefined ? {} : { streamId: draft.streamId }),
+      startNs: draft.startNs,
+      endNs: draft.endNs ?? draft.startNs,
+      shape:
+        (draft.endNs ?? draft.startNs) === draft.startNs ? "point" : "interval",
+      kind: draft.kind,
+      payload: draft.payload ?? {},
+      version: (current?.version ?? 0) + 1,
+      status: current?.status ?? "draft",
+      actor: "fixture-analyst",
+      provenance: draft.provenance ?? { source: "viewer-fixture" },
+      createdAt: current?.createdAt ?? now,
+      updatedAt: now
+    };
+    annotations = [...annotations.filter(({ id }) => id !== item.id), item];
+    return item;
+  };
   return {
     listSessions: () =>
       Promise.resolve([
         { id: manifest.sessionId, manifest, processingStatus: "ready" as const }
       ]),
     getSessionManifest: () => Promise.resolve(manifest),
+    listAnnotations: () => Promise.resolve(annotations),
+    createAnnotation: (_sessionId, draft) => Promise.resolve(save(draft)),
+    updateAnnotation: (_sessionId, id, update) => {
+      const current = annotations.find((item) => item.id === id);
+      if (current?.version !== update.expectedVersion)
+        return Promise.reject(
+          new Error("Annotation changed; reload before editing.")
+        );
+      return Promise.resolve(save(update, current));
+    },
+    reviewAnnotation: (_sessionId, id, review) => {
+      const current = annotations.find((item) => item.id === id);
+      if (current?.version !== review.expectedVersion)
+        return Promise.reject(
+          new Error("Annotation changed; reload before reviewing.")
+        );
+      const updated = {
+        ...current,
+        version: current.version + 1,
+        status: review.decision,
+        actor: "fixture-engineer",
+        updatedAt: new Date().toISOString()
+      };
+      annotations = annotations.map((item) =>
+        item.id === id ? updated : item
+      );
+      return Promise.resolve(updated);
+    },
+    annotationHistory: (_sessionId, id) =>
+      Promise.resolve(
+        annotations
+          .filter((item) => item.id === id)
+          .map((item) => ({
+            id: item.version,
+            occurredAt: item.updatedAt,
+            actor: item.actor,
+            action: `annotation.${item.status}`,
+            payload: { version: item.version }
+          }))
+      ),
     mediaSources: (_sessionId, stream) =>
       workerMedia
         ? [{ src: `/fixtures/${stream.id}.ivf`, type: "video/x-ivf" }]

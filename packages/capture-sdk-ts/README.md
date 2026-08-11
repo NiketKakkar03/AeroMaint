@@ -4,6 +4,11 @@ The public TypeScript client for AeroMaint capture sessions. It converts nanosec
 `bigint`, validates manifests, supports bearer or callback-based authentication, cancellation,
 bounded retries, lazy cursor iteration, Arrow/JSON sample windows, and frame lookup.
 
+Versioned annotation methods include `listAnnotations`, `createAnnotation`,
+`updateAnnotation`, `reviewAnnotation`, and `annotationHistory`. Mutations
+require an idempotency key. Updates and reviews send the expected version in
+the body and `If-Match`; stale writes raise a typed `conflict` error.
+
 ```ts
 import { CaptureClient } from "@aeromaint/capture-sdk";
 

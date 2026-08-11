@@ -22,6 +22,53 @@ const fixture: Record<string, unknown> = JSON.parse(
 afterEach(() => vi.useRealTimers());
 
 describe("CaptureClient", () => {
+  it("sends annotation optimistic concurrency and parses canonical timestamps", async () => {
+    const item = {
+      id: "annotation-1",
+      session_id: "session/one",
+      start_ns: "9007199254740993",
+      end_ns: "9007199254740994",
+      shape: "interval",
+      kind: "finding",
+      payload: {},
+      version: 3,
+      status: "draft",
+      actor: "analyst",
+      provenance: { source: "viewer" },
+      created_at: "2026-08-11T00:00:00Z",
+      updated_at: "2026-08-11T00:01:00Z"
+    };
+    const fetch = vi
+      .fn<typeof globalThis.fetch>()
+      .mockResolvedValue(new Response(JSON.stringify(item)));
+    const client = new CaptureClient({ baseUrl: "https://api.test", fetch });
+
+    const updated = await client.updateAnnotation(
+      "session/one",
+      "annotation-1",
+      {
+        startNs: 9_007_199_254_740_993n,
+        endNs: 9_007_199_254_740_994n,
+        kind: "finding",
+        expectedVersion: 2
+      },
+      { idempotencyKey: "stable-update" }
+    );
+
+    expect(updated.startNs).toBe(9_007_199_254_740_993n);
+    expect(fetch.mock.calls[0]?.[0]).toBe(
+      "https://api.test/v1/sessions/session%2Fone/annotations/annotation-1"
+    );
+    const request = fetch.mock.calls[0]?.[1];
+    const headers = new Headers(request?.headers);
+    expect(headers.get("if-match")).toBe('"2"');
+    expect(headers.get("idempotency-key")).toBe("stable-update");
+    expect(typeof request?.body).toBe("string");
+    expect(JSON.parse(request?.body as string)).toMatchObject({
+      start_ns: "9007199254740993",
+      expected_version: 2
+    });
+  });
   it("fetches manifests and preserves timestamps beyond Number precision", async () => {
     const fetch = vi
       .fn<typeof globalThis.fetch>()

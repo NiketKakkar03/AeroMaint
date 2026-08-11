@@ -32,7 +32,12 @@ class Annotation(BaseModel):
     end_ns: int
     kind: str
     payload: dict[str, Any] = Field(default_factory=dict)
+    version: int = 1
+    status: str = "draft"
+    actor: str
+    provenance: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime
+    updated_at: datetime
 
 
 class AuditEvent(BaseModel):

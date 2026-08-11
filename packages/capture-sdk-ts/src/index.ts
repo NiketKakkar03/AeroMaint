@@ -7,6 +7,22 @@ import {
   type StreamKind,
   type TimestampNs
 } from "@aeromaint/contracts";
+import { annotationBody, parseAnnotation } from "./annotations.js";
+import type {
+  Annotation,
+  AnnotationAuditEvent,
+  AnnotationDraft,
+  AnnotationReview,
+  AnnotationUpdate
+} from "./annotations.js";
+
+export type {
+  Annotation,
+  AnnotationAuditEvent,
+  AnnotationDraft,
+  AnnotationReview,
+  AnnotationUpdate
+} from "./annotations.js";
 
 export type { CaptureSessionManifest, CaptureStream, StreamKind, TimestampNs };
 
@@ -14,6 +30,7 @@ export type CaptureSdkErrorCode =
   | "aborted"
   | "authentication_error"
   | "forbidden"
+  | "conflict"
   | "http_error"
   | "invalid_response"
   | "invalid_manifest"
@@ -85,6 +102,10 @@ export interface CaptureClientOptions {
 
 export interface RequestOptions {
   readonly signal?: AbortSignal;
+}
+
+export interface MutationOptions extends RequestOptions {
+  readonly idempotencyKey: string;
 }
 
 export interface PageOptions extends RequestOptions {
@@ -331,6 +352,12 @@ function sdkErrorForResponse(status: number, detail: string): CaptureHttpError {
       `Resource was not found${suffix}`,
       status,
       "not_found"
+    );
+  if (status === 409)
+    return new CaptureHttpError(
+      `Request conflicts with a newer resource version${suffix}`,
+      status,
+      "conflict"
     );
   if (status === 429)
     return new CaptureHttpError(
@@ -729,5 +756,108 @@ export class CaptureClient {
     });
     if (response.status === 204) return undefined;
     return parseFrame(await response.json(), streamId);
+  }
+
+  public async listAnnotations(
+    sessionId: string,
+    options: RequestOptions = {}
+  ): Promise<readonly Annotation[]> {
+    const response = await this.#request(
+      `/v1/sessions/${encodeURIComponent(sessionId)}/annotations`,
+      {
+        signal: options.signal ?? null
+      }
+    );
+    const envelope = pageEnvelope(await response.json());
+    return envelope.items.map(parseAnnotation);
+  }
+
+  public async createAnnotation(
+    sessionId: string,
+    draft: AnnotationDraft,
+    options: MutationOptions
+  ): Promise<Annotation> {
+    return this.#annotationMutation(
+      `/v1/sessions/${encodeURIComponent(sessionId)}/annotations`,
+      "POST",
+      annotationBody(draft),
+      options
+    );
+  }
+
+  public async updateAnnotation(
+    sessionId: string,
+    annotationId: string,
+    update: AnnotationUpdate,
+    options: MutationOptions
+  ): Promise<Annotation> {
+    return this.#annotationMutation(
+      `/v1/sessions/${encodeURIComponent(sessionId)}/annotations/${encodeURIComponent(annotationId)}`,
+      "PUT",
+      { ...annotationBody(update), expected_version: update.expectedVersion },
+      options,
+      update.expectedVersion
+    );
+  }
+
+  public async reviewAnnotation(
+    sessionId: string,
+    annotationId: string,
+    review: AnnotationReview,
+    options: MutationOptions
+  ): Promise<Annotation> {
+    return this.#annotationMutation(
+      `/v1/sessions/${encodeURIComponent(sessionId)}/annotations/${encodeURIComponent(annotationId)}/review`,
+      "POST",
+      {
+        expected_version: review.expectedVersion,
+        decision: review.decision,
+        ...(review.comment === undefined ? {} : { comment: review.comment })
+      },
+      options,
+      review.expectedVersion
+    );
+  }
+
+  public async annotationHistory(
+    sessionId: string,
+    annotationId: string,
+    options: RequestOptions = {}
+  ): Promise<readonly AnnotationAuditEvent[]> {
+    const response = await this.#request(
+      `/v1/sessions/${encodeURIComponent(sessionId)}/annotations/${encodeURIComponent(annotationId)}/history`,
+      { signal: options.signal ?? null }
+    );
+    const envelope = pageEnvelope(await response.json());
+    return envelope.items.map((value) => {
+      const item = record(value, "Annotation audit event");
+      return {
+        id: numberField(item.id, "Audit id"),
+        occurredAt: stringField(item.occurred_at, "Audit occurred_at"),
+        actor: stringField(item.actor, "Audit actor"),
+        action: stringField(item.action, "Audit action"),
+        payload: record(item.payload ?? {}, "Audit payload")
+      };
+    });
+  }
+
+  async #annotationMutation(
+    path: string,
+    method: "POST" | "PUT",
+    body: Record<string, unknown>,
+    options: MutationOptions,
+    version?: number
+  ): Promise<Annotation> {
+    const response = await this.#request(path, {
+      method,
+      headers: {
+        "content-type": "application/json",
+        "idempotency-key": options.idempotencyKey,
+        ...(version === undefined ? {} : { "if-match": `"${String(version)}"` })
+      },
+      body: JSON.stringify(body),
+      signal: options.signal ?? null
+    });
+    return parseAnnotation(await response.json());
   }
 }
