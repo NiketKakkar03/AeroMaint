@@ -15,6 +15,7 @@
     "@aeromaint/contracts": "workspace:*",
     "@aeromaint/observability": "workspace:*",
     "@aeromaint/playback-core": "workspace:*",
+    "@aeromaint/timeline-renderer": "workspace:*",
     "@tanstack/react-query": "^5.83.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"

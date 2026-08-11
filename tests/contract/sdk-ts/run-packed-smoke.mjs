@@ -16,6 +16,7 @@ const consumer = mkdtempSync(join(tmpdir(), "aeromaint-sdk-consumer-"));
 const environment = {
   ...process.env,
   CI: "true",
+  npm_config_offline: "true",
   npm_config_cache: join(consumer, ".npm-cache")
 };
 

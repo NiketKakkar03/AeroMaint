@@ -1,7 +1,8 @@
 import type { StreamGap } from "@aeromaint/contracts";
+import { envelopeForViewport } from "@aeromaint/timeline-renderer";
+import { useEffect, useRef } from "react";
 import {
   closestSample,
-  sampleSegments,
   valueExtent,
   type VectorAxis,
   type VectorSample
@@ -38,12 +39,57 @@ export function SensorPlot({
   const headingId = `${title.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-")}-heading`;
   const width = 760;
   const height = 180;
+  const canvas = useRef<HTMLCanvasElement>(null);
   const duration = endNs - startNs;
   const [min, max] = valueExtent(samples);
   const x = (timeNs: bigint) =>
     duration <= 0n ? 0 : (Number(timeNs - startNs) / Number(duration)) * width;
   const y = (value: number) => height - ((value - min) / (max - min)) * height;
   const selected = closestSample(samples, selectedTimeNs);
+
+  useEffect(() => {
+    const element = canvas.current;
+    const context = element?.getContext("2d");
+    if (!element || !context) return;
+    const scale = window.devicePixelRatio || 1;
+    element.width = width * scale;
+    element.height = height * scale;
+    context.setTransform(scale, 0, 0, scale, 0, 0);
+    context.clearRect(0, 0, width, height);
+    context.fillStyle = "rgba(239, 107, 107, 0.12)";
+    for (const gap of gaps)
+      context.fillRect(
+        x(gap.startNs),
+        0,
+        x(gap.endNs) - x(gap.startNs),
+        height
+      );
+    for (const axis of AXES) {
+      const envelopes = envelopeForViewport(
+        samples.map((sample) => ({
+          timeNs: sample.timeNs,
+          value: sample[axis]
+        })),
+        startNs,
+        endNs,
+        width
+      );
+      context.strokeStyle = COLORS[axis];
+      context.lineWidth = 1.5;
+      context.beginPath();
+      for (const envelope of envelopes) {
+        const pixelX = x(envelope.startNs);
+        context.moveTo(pixelX, y(envelope.min));
+        context.lineTo(pixelX, y(envelope.max));
+      }
+      context.stroke();
+    }
+    context.strokeStyle = "rgba(255,255,255,0.8)";
+    context.beginPath();
+    context.moveTo(x(selectedTimeNs), 0);
+    context.lineTo(x(selectedTimeNs), height);
+    context.stroke();
+  }, [endNs, gaps, max, min, samples, selectedTimeNs, startNs]);
 
   return (
     <section className="sensor-card" aria-labelledby={headingId}>
@@ -62,9 +108,10 @@ export function SensorPlot({
         </ul>
       </div>
       <div className="plot-shell">
-        <svg
+        <canvas
+          ref={canvas}
           className="sensor-plot"
-          viewBox={`0 0 ${String(width)} ${String(height)}`}
+          style={{ width: "100%", height: `${String(height)}px` }}
           role="img"
           aria-label={`${title} plot in ${unit}. Select a point to seek playback.`}
           onClick={(event) => {
@@ -77,43 +124,7 @@ export function SensorPlot({
               startNs + BigInt(Math.round(Number(duration) * ratio))
             );
           }}
-        >
-          <title>
-            {title} in {unit}
-          </title>
-          {gaps.map((gap) => (
-            <rect
-              key={`${String(gap.startNs)}-${String(gap.endNs)}`}
-              className="plot-gap"
-              x={x(gap.startNs)}
-              width={x(gap.endNs) - x(gap.startNs)}
-              height={height}
-            />
-          ))}
-          {AXES.flatMap((axis) =>
-            sampleSegments(samples, gaps).map((segment, index) => (
-              <polyline
-                key={`${axis}-${String(index)}`}
-                fill="none"
-                stroke={COLORS[axis]}
-                strokeWidth="2"
-                points={segment
-                  .map(
-                    (sample) =>
-                      `${String(x(sample.timeNs))},${String(y(sample[axis]))}`
-                  )
-                  .join(" ")}
-              />
-            ))
-          )}
-          <line
-            className="plot-cursor"
-            x1={x(selectedTimeNs)}
-            x2={x(selectedTimeNs)}
-            y1="0"
-            y2={height}
-          />
-        </svg>
+        />
         <button
           type="button"
           className="plot-selection"
