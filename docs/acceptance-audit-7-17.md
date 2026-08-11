@@ -22,19 +22,19 @@ when every stated criterion and validation item has direct evidence.
 
 ## Executed validation
 
-- `pnpm check`: formatting, ESLint, strict TypeScript, 53 TypeScript tests — pass.
+- `pnpm check`: formatting, ESLint, strict TypeScript, 61 TypeScript tests — pass.
+- `pnpm test:sdk-pack`: three packed artifacts install in a clean temporary consumer and the
+  reference CLI/API smoke passes without monorepo resolution.
 - Python suite without PostgreSQL networking: 66 tests — pass.
 - PostgreSQL integration suite: 4 tests — pass in the earlier unrestricted local run against the
   `pgvector/pgvector:pg16` Compose service.
-- In-app browser against live API/viewer: session library, session navigation, URL timestamp deep
-  link, keyboard Home seek, fallback state, Canvas plot, diagnostics, accessible names, and duplicate
-  ID audit — pass.
+- Four Playwright browser workflows: synchronized session navigation, deep links and cancellation;
+  real VP8/IVF worker decode and fallback; bounded worker cleanup; and 200,000-sample virtualized
+  sensor memory/long-task evidence — pass.
 - Million-sample timeline envelope test: one million input samples produce exactly 800 viewport
   buckets and complete in under one second on the audit machine.
 
 ## Environment blockers
 
-The final combined PostgreSQL and live Node SDK repetitions were blocked by the active command
-sandbox denying localhost TCP connections. The same PostgreSQL test file passed all four tests in an
-earlier unrestricted run during this audit. The packed-consumer harness also encountered unavailable
-registry/cache artifacts. These are recorded as unverified gates rather than product failures.
+None remain for issues #7–#17. The PostgreSQL result above is retained from the earlier unrestricted
+local run; all TypeScript, packed-consumer, and browser gates were repeated after the final changes.
