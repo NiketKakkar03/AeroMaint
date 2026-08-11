@@ -5,6 +5,9 @@ export default defineConfig(({ mode }) => {
   const environment = loadEnv(mode, ".", "");
   return {
     plugins: [react()],
+    test: {
+      exclude: ["tests/browser/**", "**/node_modules/**", "**/dist/**"]
+    },
     server: {
       port: 5173,
       proxy: {

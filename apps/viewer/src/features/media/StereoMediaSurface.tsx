@@ -98,6 +98,10 @@ function MediaPane(
       </article>
     );
   const sources = dataSource.mediaSources(manifest.sessionId, stream, manifest);
+  const synthetic = sources.find((source) => source.synthetic)?.synthetic;
+  const unsupported = sources.some(
+    (source) => source.compatibility === "unsupported"
+  );
   return (
     <article className="media-pane">
       <div className="media-heading">
@@ -105,61 +109,82 @@ function MediaPane(
           <span>{stream.id}</span>
           <h3>{stream.schemaRef}</h3>
         </div>
-        <span className={`media-state ${state}`}>{state}</span>
+        <span
+          className={`media-state ${unsupported ? "error" : synthetic ? "ready" : state}`}
+        >
+          {unsupported ? "unsupported" : synthetic ? "ready" : state}
+        </span>
         <span className="media-path">{mediaPath}</span>
       </div>
       <div className="video-frame">
-        <video
-          ref={video}
-          aria-label={`${stream.id} media`}
-          muted
-          playsInline
-          preload="metadata"
-          onCanPlay={() => {
-            setState("ready");
-            props.onMetricEvent?.({
-              type: "first-frame",
-              atMs: performance.now()
-            });
-            if (bufferingStartedAt.current !== null) {
+        {synthetic ? (
+          <div
+            className="synthetic-media"
+            data-testid={`${stream.id}-fixture-media`}
+            style={{ "--fixture-hue": synthetic.hue } as React.CSSProperties}
+            aria-label={`${stream.id} media`}
+          >
+            <strong>{synthetic.label}</strong>
+            <span>
+              {(Number(playheadNs - manifest.startNs) / 1_000_000_000).toFixed(
+                3
+              )}{" "}
+              s
+            </span>
+          </div>
+        ) : (
+          <video
+            ref={video}
+            aria-label={`${stream.id} media`}
+            muted
+            playsInline
+            preload="metadata"
+            onCanPlay={() => {
+              setState("ready");
               props.onMetricEvent?.({
-                type: "buffering",
-                durationMs: performance.now() - bufferingStartedAt.current
+                type: "first-frame",
+                atMs: performance.now()
               });
-              bufferingStartedAt.current = null;
-            }
-          }}
-          onWaiting={() => {
-            setState("buffering");
-            bufferingStartedAt.current ??= performance.now();
-          }}
-          onTimeUpdate={(event) => {
-            const mediaTimeNs =
-              manifest.startNs +
-              BigInt(
-                Math.round(event.currentTarget.currentTime * 1_000_000_000)
-              );
-            props.onMetricEvent?.({
-              type: "frame",
-              driftMs: Number(mediaTimeNs - playheadNs) / 1_000_000,
-              late: Math.abs(Number(mediaTimeNs - playheadNs)) > 80_000_000
-            });
-          }}
-          onError={() => {
-            setState("error");
-          }}
-        >
-          {sources.map((source) => (
-            <source key={source.src} src={source.src} type={source.type} />
-          ))}
-          This browser cannot play the published media.
-        </video>
+              if (bufferingStartedAt.current !== null) {
+                props.onMetricEvent?.({
+                  type: "buffering",
+                  durationMs: performance.now() - bufferingStartedAt.current
+                });
+                bufferingStartedAt.current = null;
+              }
+            }}
+            onWaiting={() => {
+              setState("buffering");
+              bufferingStartedAt.current ??= performance.now();
+            }}
+            onTimeUpdate={(event) => {
+              const mediaTimeNs =
+                manifest.startNs +
+                BigInt(
+                  Math.round(event.currentTarget.currentTime * 1_000_000_000)
+                );
+              props.onMetricEvent?.({
+                type: "frame",
+                driftMs: Number(mediaTimeNs - playheadNs) / 1_000_000,
+                late: Math.abs(Number(mediaTimeNs - playheadNs)) > 80_000_000
+              });
+            }}
+            onError={() => {
+              setState("error");
+            }}
+          >
+            {sources.map((source) => (
+              <source key={source.src} src={source.src} type={source.type} />
+            ))}
+            This browser cannot play the published media.
+          </video>
+        )}
         {gap ? (
           <div className="media-overlay" role="status">
             Missing frames · {gap.reason}
           </div>
         ) : null}
-        {state === "error" ? (
+        {state === "error" || unsupported ? (
           <div className="media-overlay error" role="alert">
             Unsupported codec or media unavailable
           </div>

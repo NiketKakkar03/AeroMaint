@@ -17,6 +17,9 @@ export interface SessionSummary {
 export interface MediaSource {
   readonly src: string;
   readonly type?: string;
+  readonly compatibility?: "unsupported";
+  /** Deterministic browser-only media used by the public viewer smoke fixture. */
+  readonly synthetic?: { readonly label: string; readonly hue: number };
 }
 
 export interface ViewerDataSource {

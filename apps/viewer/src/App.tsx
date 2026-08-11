@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type { CaptureSessionManifest } from "@aeromaint/contracts";
 import {
   PlaybackMetricsCollector,
@@ -8,6 +8,7 @@ import {
 } from "@aeromaint/observability";
 import {
   initialPlaybackState,
+  playbackReducer,
   type PlaybackState
 } from "@aeromaint/playback-core";
 import { StereoMediaSurface } from "./features/media/StereoMediaSurface.js";
@@ -18,7 +19,6 @@ import { Timeline } from "./features/playback/PlaybackTimeline.js";
 import { SensorPlot } from "./features/sensors/SensorPlot.js";
 import type { VectorSample } from "./features/sensors/sensorMath.js";
 import {
-  clampTimestamp,
   timestampFromUrl,
   urlWithTimestamp
 } from "./features/playback/timeline.js";
@@ -49,11 +49,44 @@ function SessionViewer({
   readonly dataSource: ViewerDataSource;
   readonly onBack: () => void;
 }) {
-  const [playback, setPlayback] = useState<PlaybackState>(() => ({
-    ...initialPlaybackState,
-    status: "paused",
-    currentTimeNs: timestampFromUrl(window.location.search, manifest)
-  }));
+  const nowNs = () => BigInt(Math.round(performance.now() * 1_000_000));
+  const [playback, dispatchPlayback] = useReducer(
+    playbackReducer,
+    undefined,
+    (): PlaybackState => {
+      const source = {
+        startNs: manifest.startNs,
+        endNs: manifest.endNs,
+        streams: manifest.streams.map(({ id, gaps }) => ({ id, gaps })),
+        masterStreamId:
+          manifest.streams.find((stream) => stream.kind === "video")?.id ??
+          manifest.streams[0]?.id ??
+          ""
+      };
+      const clock = nowNs();
+      let state = playbackReducer(initialPlaybackState, {
+        type: "load",
+        source,
+        nowNs: clock
+      });
+      state = playbackReducer(state, { type: "loaded", nowNs: clock });
+      const selected = timestampFromUrl(window.location.search, manifest);
+      if (selected !== manifest.startNs) {
+        state = playbackReducer(state, {
+          type: "seek",
+          targetNs: selected,
+          nowNs: clock
+        });
+        state = playbackReducer(state, {
+          type: "seeked",
+          generation: state.seekGeneration,
+          actualNs: selected,
+          nowNs: clock
+        });
+      }
+      return state;
+    }
+  );
   const [sensorSamples, setSensorSamples] = useState<readonly VectorSample[]>(
     []
   );
@@ -137,22 +170,8 @@ function SessionViewer({
   }, [playback.currentTimeNs]);
   useEffect(() => {
     if (!playing) return;
-    let previous = performance.now();
     const timer = window.setInterval(() => {
-      const now = performance.now();
-      const elapsedNs = BigInt(Math.round((now - previous) * 1_000_000));
-      previous = now;
-      setPlayback((current) => {
-        const next = clampTimestamp(
-          current.currentTimeNs + elapsedNs,
-          manifest
-        );
-        return {
-          ...current,
-          currentTimeNs: next,
-          status: next === manifest.endNs ? "ended" : current.status
-        };
-      });
+      dispatchPlayback({ type: "tick", nowNs: nowNs() });
     }, 50);
     return () => {
       window.clearInterval(timer);
@@ -186,18 +205,20 @@ function SessionViewer({
         playheadNs={playback.currentTimeNs}
         playing={playing}
         onPlayingChange={(next) => {
-          setPlayback((current) => ({
-            ...current,
-            status: next ? "playing" : "paused"
-          }));
+          dispatchPlayback({ type: next ? "play" : "pause", nowNs: nowNs() });
         }}
         onSeek={(currentTimeNs) => {
-          setPlayback((current) => ({
-            ...current,
-            status: "paused",
-            currentTimeNs,
-            seekGeneration: current.seekGeneration + 1
-          }));
+          dispatchPlayback({
+            type: "seek",
+            targetNs: currentTimeNs,
+            nowNs: nowNs()
+          });
+          dispatchPlayback({
+            type: "seeked",
+            generation: playback.seekGeneration + 1,
+            actualNs: currentTimeNs,
+            nowNs: nowNs()
+          });
         }}
       />
       <Timeline
@@ -205,18 +226,23 @@ function SessionViewer({
         currentTimeNs={playback.currentTimeNs}
         gaps={gaps}
         onTogglePlayback={() => {
-          setPlayback((current) => ({
-            ...current,
-            status: current.status === "playing" ? "paused" : "playing"
-          }));
+          dispatchPlayback({
+            type: playing ? "pause" : "play",
+            nowNs: nowNs()
+          });
         }}
         onSeek={(currentTimeNs) => {
-          setPlayback((current) => ({
-            ...current,
-            status: "paused",
-            currentTimeNs,
-            seekGeneration: current.seekGeneration + 1
-          }));
+          dispatchPlayback({
+            type: "seek",
+            targetNs: currentTimeNs,
+            nowNs: nowNs()
+          });
+          dispatchPlayback({
+            type: "seeked",
+            generation: playback.seekGeneration + 1,
+            actualNs: currentTimeNs,
+            nowNs: nowNs()
+          });
         }}
       />
       {sensorStream ? (
@@ -230,12 +256,17 @@ function SessionViewer({
             endNs={sensorStream.endNs}
             selectedTimeNs={playback.currentTimeNs}
             onSelectTime={(currentTimeNs) => {
-              setPlayback((current) => ({
-                ...current,
-                status: "paused",
-                currentTimeNs,
-                seekGeneration: current.seekGeneration + 1
-              }));
+              dispatchPlayback({
+                type: "seek",
+                targetNs: currentTimeNs,
+                nowNs: nowNs()
+              });
+              dispatchPlayback({
+                type: "seeked",
+                generation: playback.seekGeneration + 1,
+                actualNs: currentTimeNs,
+                nowNs: nowNs()
+              });
             }}
           />
         ) : (
@@ -317,8 +348,11 @@ export function App({
     };
   }, [dataSource, route]);
   const navigate = (next: string) => {
-    window.history.pushState(null, "", next);
-    setRoute(currentRoute(next));
+    const target = new URL(next, window.location.origin);
+    if (new URLSearchParams(window.location.search).has("fixture"))
+      target.searchParams.set("fixture", "1");
+    window.history.pushState(null, "", `${target.pathname}${target.search}`);
+    setRoute(currentRoute(target.pathname));
   };
   if (state === "loading")
     return (
