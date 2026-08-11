@@ -30,7 +30,10 @@ function MediaPane(
     "loading" | "ready" | "buffering" | "error"
   >("loading");
   const [mediaPath, setMediaPath] = useState("HTML media fallback");
-  const gap = stream ? timestampInGap(playheadNs, stream.gaps) : undefined;
+  const gap = stream
+    ? (timestampInGap(playheadNs, stream.gaps) ??
+      stream.gaps.find((candidate) => candidate.endNs === playheadNs))
+    : undefined;
 
   useEffect(() => {
     const codec = stream?.schemaRef.match(

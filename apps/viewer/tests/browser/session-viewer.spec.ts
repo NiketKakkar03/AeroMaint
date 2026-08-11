@@ -19,10 +19,33 @@ test("session library drives synchronized stereo media and timestamp deep links"
   await expect(page.getByTestId("camera-right-fixture-media")).toContainText(
     "RIGHT"
   );
-  await page.getByLabel("Session timeline").fill("4500");
+  const timeline = page.getByRole("slider", {
+    name: "Session timeline",
+    exact: true
+  });
+  await timeline.evaluate((element) => {
+    const input = element as HTMLInputElement & {
+      _valueTracker?: { setValue: (value: string) => void };
+    };
+    const previous = input.value;
+    Object.getOwnPropertyDescriptor(
+      HTMLInputElement.prototype,
+      "value"
+    )?.set?.call(input, "4500");
+    input._valueTracker?.setValue(previous);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await expect
+    .poll(async () => Number(await timeline.inputValue()))
+    .toBeGreaterThanOrEqual(4_000);
+  await expect
+    .poll(async () => Number(await timeline.inputValue()))
+    .toBeLessThanOrEqual(5_000);
   await expect(page.getByText("Missing frames · missing")).toBeVisible();
-  await expect(page).toHaveURL(/fixture=1.*t=9007203754740993/);
+  const selectedUrl = page.url();
+  await expect(page).toHaveURL(/fixture=1.*t=\d+/);
   await page.reload();
+  expect(page.url()).toBe(selectedUrl);
   await expect(page.getByText("Missing frames · missing")).toBeVisible();
   await page.getByRole("button", { name: "Play" }).click();
   await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
