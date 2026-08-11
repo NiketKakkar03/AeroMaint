@@ -19,3 +19,39 @@ The benchmark report schema is `aeromaint.viewer-benchmark/v1`. A run identifies
 Initial budgets are warm-seek p95 ≤ 250 ms, dropped-frame rate ≤ 1%, absolute drift p95 ≤ 20 ms, and heap growth ≤ 64 MiB over 20 minutes. They are versioned inputs copied into every report, and may be overridden explicitly by a benchmark environment without changing metric definitions.
 
 For repeatability, use a release viewer build, fixed browser channel/version, no devtools, a named hardware profile, and fixture checksums from `SHA256SUMS`. Run each dataset from a fresh browser context for cold measurements. Warm-seek and bounded-memory comparisons should use identical action sequences and sampling intervals.
+
+# Viewer benchmark
+
+Run the retained browser benchmark with:
+
+```sh
+pnpm --filter @aeromaint/viewer test:benchmark
+```
+
+The default run is 20 minutes with five-second resource samples and writes
+`tests/browser-performance/reports/viewer-20min.json`. The report records the browser, host, CPU,
+dataset/schema version, measurement window, warm-seek percentiles, stereo drift, dropped-frame rate,
+transferred bytes, long tasks, and JavaScript heap growth. CI smoke runs may override
+`AEROMAINT_BENCHMARK_DURATION_MS` and `AEROMAINT_BENCHMARK_REPORT`, but only the default-duration
+report is accepted as the retained bounded-memory gate.
+
+## Retained result — 2026-08-11
+
+The committed [20-minute report](../tests/browser-performance/reports/viewer-20min.json) was recorded
+with Headless Chromium 151.0.7922.34 on an Apple M1 Pro (8 logical cores) using the version 1.0.0
+synthetic stereo/IMU/pose manifest. It contains 240 five-second resource samples and 23,262 observed
+stereo presentation updates.
+
+| Metric                          |           Result |        Budget |
+| ------------------------------- | ---------------: | ------------: |
+| Time to first frame             |        201.44 ms | informational |
+| Warm seek p50 / p95             | 14.24 / 21.60 ms |  p95 ≤ 250 ms |
+| Dropped-frame rate              |               0% |          ≤ 1% |
+| Absolute stereo drift p95 / max |         0 / 0 ms |   p95 ≤ 20 ms |
+| JavaScript heap growth          |          0 bytes |      ≤ 64 MiB |
+| Transferred bytes               |           85,350 | informational |
+| Long tasks                      |                0 | informational |
+
+All declared budgets passed. This fixture measures the synchronized synthetic presentation path and
+viewer resource bounds; it does not claim hardware video-decoder throughput. Codec decode, queue
+depth, and real-media buffering remain separate #16 browser gates.

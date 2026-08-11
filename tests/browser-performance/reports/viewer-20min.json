@@ -1,0 +1,1732 @@
+{
+  "schema": "aeromaint.viewer-benchmark/v1",
+  "identity": {
+    "runId": "viewer-mso1fxis",
+    "startedAt": "2026-08-11T02:05:26.279Z",
+    "browser": "chromium",
+    "browserVersion": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+    "hardware": "Dhirens-MacBook-Pro-2.local · darwin 25.0.0 · Apple M1 Pro · 8 logical cores",
+    "dataset": "Playable two-camera browser fixture",
+    "datasetVersion": "manifest-1.0.0"
+  },
+  "window": {
+    "durationMs": 1200000,
+    "sampleIntervalMs": 5000
+  },
+  "budgets": {
+    "warmSeekP95Ms": 250,
+    "droppedFrameRate": 0.01,
+    "absoluteDriftP95Ms": 20,
+    "memoryGrowthBytes": 67108864
+  },
+  "metrics": {
+    "timeToFirstFrameMs": 201.44399999999996,
+    "warmSeekP50Ms": 14.240624999976717,
+    "warmSeekP95Ms": 21.601999999955297,
+    "presentedFrames": 23262,
+    "droppedFrames": 0,
+    "lateFrames": 0,
+    "droppedFrameRate": 0,
+    "absoluteDriftP50Ms": 0,
+    "absoluteDriftP95Ms": 0,
+    "maxAbsoluteDriftMs": 0,
+    "bufferingCount": 0,
+    "bufferingDurationMs": 0,
+    "decodedQueueDepthMax": 0,
+    "memoryStartBytes": 10000000,
+    "memoryEndBytes": 10000000,
+    "memoryPeakBytes": 10000000,
+    "memoryGrowthBytes": 0,
+    "transferredBytes": 85350,
+    "longTaskCount": 0,
+    "longTaskDurationMs": 0
+  },
+  "resources": [
+    {
+      "atMs": 0.0008339999999407155,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 5039.051084,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 10045.411667,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 15051.965209,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 20058.88775,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 25065.571334,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 30071.70425,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 35092.747959,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 40103.3365,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 45110.063292,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 50115.548542,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 55125.11025,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 60131.675959,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 65153.194625,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 70161.38962500001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 75166.402917,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 80171.87700000001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 85179.646917,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 90186.37816699999,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 95209.527167,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 100215.15533400001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 105222.95004200001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 110230.568459,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 115236.374209,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 120244.76000000001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 125270.40604199999,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 130278.49462499999,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 135284.75583399998,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 140290.872125,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 145298.01045899998,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 150303.846625,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 155329.584917,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 160336.4625,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 165343.952667,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 170354.012709,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 175360.675667,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 180365.64275,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 185385.894459,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 190392.838667,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 195399.875667,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 200406.61308399998,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 205412.944042,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 210421.281042,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 215443.300417,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 220452.60225,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 225458.860292,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 230463.358917,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 235470.068792,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 240475.187334,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 245494.324417,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 250504.3725,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 255511.978875,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 260519.18695899998,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 265526.84870900004,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 270534.240125,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 275556.634792,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 280561.39900000003,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 285566.85025,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 290572.78991700005,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 295577.852917,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 300583.224584,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 305603.48395900003,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 310610.91625,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 315616.06600000005,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 320621.807042,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 325628.712584,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 330634.114917,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 335656.459209,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 340660.8815,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 345667.49737500004,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 350673.587,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 355679.041042,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 360685.784959,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 365711.902292,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 370718.883334,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 375726.92783400003,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 380735.93616700004,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 385745.495959,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 390754.35887500003,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 395774.125375,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 400784.08945900004,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 405821.11720900005,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 410849.195375,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 415859.80358400004,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 420867.33587500005,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 425897.31275000004,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 430904.834709,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 435911.55737500003,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 440918.159125,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 445926.76245900005,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 450933.468584,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 455961.92654200003,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 460970.464875,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 465976.839959,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 470988.454417,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 475993.95225000003,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 481000.96012500004,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 486027.996709,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 491035.3005,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 496042.44100000005,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 501052.00325,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 506060.761917,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 511068.034959,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 516094.39983400004,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 521108.289584,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 526115.253375,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 531126.6425000001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 536137.2825,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 541146.4295,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 546177.859792,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 551183.792334,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 556193.7646250001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 561202.729084,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 566208.757917,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 571214.147625,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 576241.767792,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 581255.399084,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 586262.059792,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 591269.502084,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 596276.476167,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 601286.05675,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 606309.050292,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 611315.609459,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 616321.4814170001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 621327.116292,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 626332.876375,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 631340.030667,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 636367.082042,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 641372.671459,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 646379.502292,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 651387.142334,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 656396.262542,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 661406.028084,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 666439.904834,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 671451.879792,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 676460.16725,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 681468.308292,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 686475.9885,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 691484.552792,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 696515.545334,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 701521.379667,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 706528.857959,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 711535.741042,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 716541.036584,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 721549.102584,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 726571.20975,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 731578.676917,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 736585.830292,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 741596.4433340001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 746602.681125,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 751609.5041670001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 756638.017,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 761645.338875,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 766653.338792,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 771660.237,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 776665.805042,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 781672.165,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 786693.701792,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 791701.944417,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 796709.920917,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 801716.767625,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 806724.579209,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 811735.142584,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 816761.47225,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 821767.939209,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 826774.775,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 831782.8105,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 836790.7712920001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 841801.78275,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 846827.833667,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 851834.842792,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 856843.01225,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 861851.8236250001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 866862.309667,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 871884.05075,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 876910.630209,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 881917.766125,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 886925.0545,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 891932.4656250001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 896940.140584,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 901950.272584,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 906977.021084,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 911986.1105000001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 916994.416375,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 922004.462334,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 927015.764292,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 932022.629292,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 937049.446959,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 942056.780459,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 947062.447375,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 952068.435,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 957075.730167,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 962081.38425,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 967107.4393750001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 972116.705209,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 977124.291667,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 982132.9485,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 987140.27975,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 992146.780334,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 997166.868125,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1002172.7174590001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1007182.211125,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1012187.905334,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1017199.5135,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1022206.690125,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1027226.446167,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1032235.0695,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1037242.6632920001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1042254.946875,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1047260.617917,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1052265.825459,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1057289.997542,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1062299.984292,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1067307.789542,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1072315.631459,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1077322.318125,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1082327.322709,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1087346.738167,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1092355.761334,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1097362.217709,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1102367.95025,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1107373.077209,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1112378.878459,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1117400.113584,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1122405.8865,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1127412.211084,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1132418.2096250001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1137423.4728340001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1142432.305042,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1147459.279709,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1152473.262167,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1157478.916625,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1162487.84575,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1167502.1328750001,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1172507.881834,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1177530.219084,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1182536.271834,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1187543.53575,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1192552.964917,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    },
+    {
+      "atMs": 1197558.150625,
+      "heapBytes": 10000000,
+      "transferredBytes": 85350,
+      "longTaskCount": 0,
+      "longTaskDurationMs": 0
+    }
+  ],
+  "budgetResults": {
+    "warmSeekP95Ms": true,
+    "droppedFrameRate": true,
+    "absoluteDriftP95Ms": true,
+    "memoryGrowthBytes": true
+  }
+}

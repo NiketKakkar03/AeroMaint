@@ -9,6 +9,7 @@
     "lint": "eslint src vite.config.ts",
     "test": "vitest run --passWithNoTests",
     "test:browser": "playwright test",
+    "test:benchmark": "playwright test --config playwright.benchmark.config.ts",
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {

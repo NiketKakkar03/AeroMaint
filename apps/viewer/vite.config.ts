@@ -6,7 +6,12 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     test: {
-      exclude: ["tests/browser/**", "**/node_modules/**", "**/dist/**"]
+      exclude: [
+        "tests/browser/**",
+        "tests/benchmark/**",
+        "**/node_modules/**",
+        "**/dist/**"
+      ]
     },
     server: {
       port: 5173,
