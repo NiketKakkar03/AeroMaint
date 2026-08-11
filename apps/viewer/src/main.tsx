@@ -14,8 +14,16 @@ if (root === null) {
 
 const queryClient = new QueryClient();
 const fixtureMode = new URLSearchParams(window.location.search).get("fixture");
+const requestedSamples = Number(
+  new URLSearchParams(window.location.search).get("sensorSamples") ?? "64"
+);
 const fixtureDataSource = fixtureMode
-  ? createSyntheticViewerDataSource(fixtureMode === "webcodecs")
+  ? createSyntheticViewerDataSource(
+      fixtureMode === "webcodecs",
+      Number.isInteger(requestedSamples) && requestedSamples > 0
+        ? requestedSamples
+        : 64
+    )
   : undefined;
 
 createRoot(root).render(

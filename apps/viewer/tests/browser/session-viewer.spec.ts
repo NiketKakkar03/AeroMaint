@@ -22,6 +22,7 @@ test("session library drives synchronized stereo media and timestamp deep links"
   await expect(page.getByRole("heading", { name: "imu-main" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "pose-main" })).toBeVisible();
   await expect(page.getByText("Data: raw")).toHaveCount(2);
+  await expect(page.locator('[data-virtualized-track="true"]')).toHaveCount(2);
   await page.getByLabel("Playback rate").selectOption("2");
   await expect(page.getByLabel("Playback rate")).toHaveValue("2");
   await page.getByRole("button", { name: "Zoom in timeline" }).click();

@@ -4,9 +4,89 @@ import type {
   CaptureStream
 } from "@aeromaint/contracts";
 import type { VectorSample } from "../features/sensors/sensorMath.js";
+import { WindowCache } from "@aeromaint/timeline-renderer";
+import type {
+  ArrowWorkerRequest,
+  ArrowWorkerResponse
+} from "../workers/arrow.worker.js";
+import { parseArrowVectorStream } from "../workers/arrow-ipc.js";
 
 const defaultFetch: typeof globalThis.fetch = (input, init) =>
   globalThis.fetch(input, init);
+const sensorCache = new WindowCache<readonly VectorSample[]>(8);
+const sensorTelemetry = { hits: 0, misses: 0, evictions: 0 };
+
+declare global {
+  interface Window {
+    __AEROMAINT_SENSOR_CACHE__?: {
+      hits: number;
+      misses: number;
+      evictions: number;
+    };
+  }
+}
+
+function parseArrowInWorker(
+  buffer: ArrayBuffer,
+  signal?: AbortSignal
+): Promise<readonly VectorSample[]> {
+  if (typeof Worker === "undefined") {
+    const columns = parseArrowVectorStream(buffer);
+    return Promise.resolve(
+      Array.from({ length: columns.timestampsNs.length }, (_, index) => ({
+        timeNs: columns.timestampsNs[index] ?? 0n,
+        x: columns.x[index] ?? Number.NaN,
+        y: columns.y[index] ?? Number.NaN,
+        z: columns.z[index] ?? Number.NaN
+      }))
+    );
+  }
+  return new Promise((resolve, reject) => {
+    const worker = new Worker(
+      new URL("../workers/arrow.worker.ts", import.meta.url),
+      {
+        type: "module"
+      }
+    );
+    const id = crypto.randomUUID();
+    const close = () => {
+      worker.terminate();
+    };
+    const abort = () => {
+      close();
+      reject(new DOMException("Aborted", "AbortError"));
+    };
+    signal?.addEventListener("abort", abort, { once: true });
+    worker.onmessage = (event: MessageEvent<ArrowWorkerResponse>) => {
+      if (event.data.id !== id) return;
+      signal?.removeEventListener("abort", abort);
+      close();
+      if (event.data.type === "error") {
+        reject(new Error(event.data.message));
+        return;
+      }
+      if (event.data.type !== "samples") return;
+      const { timestampsNs, x, y, z } = event.data.columns;
+      resolve(
+        Array.from({ length: timestampsNs.length }, (_, index) => ({
+          timeNs: timestampsNs[index] ?? 0n,
+          x: x[index] ?? Number.NaN,
+          y: y[index] ?? Number.NaN,
+          z: z[index] ?? Number.NaN
+        }))
+      );
+    };
+    worker.onerror = () => {
+      signal?.removeEventListener("abort", abort);
+      close();
+      reject(new Error("Arrow worker failed"));
+    };
+    worker.postMessage(
+      { type: "arrow", id, buffer } satisfies ArrowWorkerRequest,
+      [buffer]
+    );
+  });
+}
 
 export interface SessionSummary {
   readonly id: string;
@@ -125,32 +205,38 @@ export function createViewerDataSource(
         : [{ src }];
     },
     async loadVectorSamples(sessionId, streamId, startNs, endNs, signal) {
-      const range = await client.getSampleRange(sessionId, streamId, {
-        startNs,
-        endNs,
-        format: "json",
-        limit: 100,
-        ...(signal === undefined ? {} : { signal })
+      const key = `${sessionId}:${streamId}:${startNs.toString()}:${endNs.toString()}`;
+      const telemetry =
+        typeof window === "undefined"
+          ? sensorTelemetry
+          : (window.__AEROMAINT_SENSOR_CACHE__ ??= sensorTelemetry);
+      const cached = sensorCache.get(key);
+      if (cached) {
+        telemetry.hits += 1;
+        return cached;
+      }
+      telemetry.misses += 1;
+      const query = new URLSearchParams({
+        start_ns: startNs.toString(),
+        end_ns: endNs.toString()
       });
-      if (!Array.isArray(range.data)) return [];
-      return range.data.flatMap((candidate): VectorSample[] => {
-        if (typeof candidate !== "object" || candidate === null) return [];
-        const row = candidate as Record<string, unknown>;
-        const values =
-          typeof row.values === "object" && row.values !== null
-            ? (row.values as Record<string, unknown>)
-            : row;
-        const timestamp = row.timestamp_ns ?? row.timestampNs;
-        const x = values.x ?? values.ax ?? values.px;
-        const y = values.y ?? values.ay ?? values.py;
-        const z = values.z ?? values.az ?? values.pz;
-        return typeof timestamp === "bigint" &&
-          typeof x === "number" &&
-          typeof y === "number" &&
-          typeof z === "number"
-          ? [{ timeNs: timestamp, x, y, z }]
-          : [];
-      });
+      const response = await fetchImplementation(
+        `${normalizedBase}/v1/sessions/${encodeURIComponent(sessionId)}/streams/${encodeURIComponent(streamId)}/samples/arrow?${query.toString()}`,
+        {
+          ...(authorizationHeaders === undefined
+            ? {}
+            : { headers: authorizationHeaders }),
+          signal: signal ?? null
+        }
+      );
+      if (!response.ok)
+        throw new Error(`Sample request failed (${String(response.status)})`);
+      const samples = await parseArrowInWorker(
+        await response.arrayBuffer(),
+        signal
+      );
+      if (sensorCache.set(key, samples) !== undefined) telemetry.evictions += 1;
+      return samples;
     }
   };
 }

@@ -56,3 +56,11 @@ All declared budgets passed. This fixture measures the synchronized synthetic pr
 viewer resource bounds; it does not claim hardware video-decoder throughput. The separate #16
 browser suite encodes VP8 frames, demuxes IVF in a worker, presents transferable `VideoFrame`s through
 a bounded queue, and verifies seek-generation cleanup and the HTML fallback.
+
+## Scalable sensor rendering
+
+The committed [sensor rendering report](../tests/browser-performance/reports/sensor-rendering.json)
+records two virtualized 100,000-sample tracks in Chromium. After the envelope workers settled,
+repeated cross-track scrolling produced zero long tasks and zero measured heap growth against the
+64 MiB / 200 ms budgets. This complements the deterministic one-million-sample, 800-pixel envelope
+test; the browser fixture is smaller so fixture generation is not mistaken for renderer work.

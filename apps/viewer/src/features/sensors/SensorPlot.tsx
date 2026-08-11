@@ -1,6 +1,10 @@
 import type { StreamGap } from "@aeromaint/contracts";
-import { envelopeForViewport } from "@aeromaint/timeline-renderer";
-import { useEffect, useRef } from "react";
+import type { TimelineEnvelope } from "@aeromaint/timeline-renderer";
+import { useEffect, useRef, useState } from "react";
+import type {
+  ArrowWorkerRequest,
+  ArrowWorkerResponse
+} from "../../workers/arrow.worker.js";
 import {
   closestSample,
   valueExtent,
@@ -48,6 +52,44 @@ export function SensorPlot({
     duration <= 0n ? 0 : (Number(timeNs - startNs) / Number(duration)) * width;
   const y = (value: number) => height - ((value - min) / (max - min)) * height;
   const selected = closestSample(samples, selectedTimeNs);
+  const [axisEnvelopes, setAxisEnvelopes] = useState<
+    readonly (readonly TimelineEnvelope[])[]
+  >([]);
+
+  useEffect(() => {
+    const worker = new Worker(
+      new URL("../../workers/arrow.worker.ts", import.meta.url),
+      { type: "module" }
+    );
+    const id = crypto.randomUUID();
+    const timestampsNs = BigInt64Array.from(
+      samples.map((sample) => sample.timeNs)
+    );
+    const axisValues = AXES.map((axis) =>
+      Float64Array.from(samples.map((sample) => sample[axis]))
+    ) as [Float64Array, Float64Array, Float64Array];
+    worker.onmessage = (event: MessageEvent<ArrowWorkerResponse>) => {
+      if (event.data.id === id && event.data.type === "vector-envelope")
+        setAxisEnvelopes(event.data.axes);
+    };
+    worker.postMessage(
+      {
+        type: "vector-envelope",
+        id,
+        timestampsNs,
+        x: axisValues[0],
+        y: axisValues[1],
+        z: axisValues[2],
+        startNs,
+        endNs,
+        viewportPixels: width
+      } satisfies ArrowWorkerRequest,
+      [timestampsNs.buffer, ...axisValues.map((values) => values.buffer)]
+    );
+    return () => {
+      worker.terminate();
+    };
+  }, [endNs, samples, startNs]);
 
   useEffect(() => {
     const element = canvas.current;
@@ -66,16 +108,8 @@ export function SensorPlot({
         x(gap.endNs) - x(gap.startNs),
         height
       );
-    for (const axis of AXES) {
-      const envelopes = envelopeForViewport(
-        samples.map((sample) => ({
-          timeNs: sample.timeNs,
-          value: sample[axis]
-        })),
-        startNs,
-        endNs,
-        width
-      );
+    for (const [axisIndex, axis] of AXES.entries()) {
+      const envelopes = axisEnvelopes[axisIndex] ?? [];
       context.strokeStyle = COLORS[axis];
       context.lineWidth = 1.5;
       context.beginPath();
@@ -91,10 +125,18 @@ export function SensorPlot({
     context.moveTo(x(selectedTimeNs), 0);
     context.lineTo(x(selectedTimeNs), height);
     context.stroke();
-  }, [endNs, gaps, max, min, samples, selectedTimeNs, startNs]);
+  }, [axisEnvelopes, endNs, gaps, max, min, selectedTimeNs, startNs]);
 
   return (
-    <section className="sensor-card" aria-labelledby={headingId}>
+    <section
+      className="sensor-card"
+      aria-labelledby={headingId}
+      data-virtualized-track="true"
+      style={{
+        contentVisibility: "auto",
+        containIntrinsicSize: `auto ${String(height + 80)}px`
+      }}
+    >
       <div className="sensor-heading">
         <div>
           <h2 id={headingId}>{title}</h2>

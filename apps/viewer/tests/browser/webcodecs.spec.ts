@@ -121,7 +121,7 @@ test("worker demuxes and presents VP8 while seek generations stay bounded", asyn
             .__AEROMAINT_WORKERS__.active
       )
     )
-    .toBe(2);
+    .toBe(4);
 });
 
 test("labels the supported HTML fallback when WebCodecs is unavailable", async ({

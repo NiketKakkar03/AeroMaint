@@ -1,0 +1,19 @@
+{
+  "recordedAt": "2026-08-11T02:48:27.545Z",
+  "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+  "dataset": {
+    "tracks": 2,
+    "samplesPerTrack": 100000,
+    "totalSamples": 200000
+  },
+  "virtualization": "CSS content-visibility auto",
+  "baselineHeapBytes": 10000000,
+  "finalHeapBytes": 10000000,
+  "heapGrowthBytes": 0,
+  "longTaskCount": 0,
+  "maxLongTaskMs": 0,
+  "budgets": {
+    "heapGrowthBytes": 67108864,
+    "maxLongTaskMs": 200
+  }
+}

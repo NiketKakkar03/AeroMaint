@@ -112,7 +112,8 @@ const manifest = parseManifest({
 });
 
 export function createSyntheticViewerDataSource(
-  workerMedia = false
+  workerMedia = false,
+  sensorSampleCount = 64
 ): ViewerDataSource {
   return {
     listSessions: () =>
@@ -136,19 +137,8 @@ export function createSyntheticViewerDataSource(
     loadVectorSamples: (_sessionId, streamId, startNs, endNs, signal) => {
       if (signal?.aborted)
         return Promise.reject(new DOMException("Aborted", "AbortError"));
-      const count = 64;
+      const count = sensorSampleCount;
       const duration = endNs - startNs;
-      const samples = Array.from({ length: count }, (_, index) => {
-        const ratio = index / (count - 1);
-        const phase = ratio * Math.PI * 4;
-        return {
-          timeNs:
-            startNs + BigInt(Math.round(Number(duration) * Math.min(1, ratio))),
-          x: Math.sin(phase) * (streamId === "imu-main" ? 9.81 : 2),
-          y: Math.cos(phase * 0.7) * (streamId === "imu-main" ? 4 : 1),
-          z: Math.sin(phase * 0.3) * (streamId === "imu-main" ? 2 : 0.5)
-        };
-      });
       const fixtureRequests = (window.__AEROMAINT_FIXTURE_REQUESTS__ ??= {
         started: 0,
         aborted: 0
@@ -162,6 +152,18 @@ export function createSyntheticViewerDataSource(
         };
         const timer = window.setTimeout(() => {
           signal?.removeEventListener("abort", onAbort);
+          const samples = Array.from({ length: count }, (_, index) => {
+            const ratio = index / (count - 1);
+            const phase = ratio * Math.PI * 4;
+            return {
+              timeNs:
+                startNs +
+                BigInt(Math.round(Number(duration) * Math.min(1, ratio))),
+              x: Math.sin(phase) * (streamId === "imu-main" ? 9.81 : 2),
+              y: Math.cos(phase * 0.7) * (streamId === "imu-main" ? 4 : 1),
+              z: Math.sin(phase * 0.3) * (streamId === "imu-main" ? 2 : 0.5)
+            };
+          });
           resolve(samples);
         }, 25);
         signal?.addEventListener("abort", onAbort, { once: true });

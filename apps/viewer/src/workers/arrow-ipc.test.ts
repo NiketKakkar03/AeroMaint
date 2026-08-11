@@ -1,0 +1,28 @@
+import { describe, expect, it } from "vitest";
+import { parseArrowVectorStream } from "./arrow-ipc.js";
+
+const ARROW_FIXTURE =
+  "/////xABAAAQAAAAAAAKAAwABgAFAAgACgAAAAABBAAMAAAACAAIAAAABAAIAAAABAAAAAQAAACgAAAAXAAAADAAAAAEAAAAgP///wAAAQMQAAAAFAAAAAQAAAAAAAAAAgAAAGF6AACu////AAACAKj///8AAAEDEAAAABQAAAAEAAAAAAAAAAIAAABheQAA1v///wAAAgDQ////AAABAxAAAAAcAAAABAAAAAAAAAACAAAAYXgAAAAABgAIAAYABgAAAAAAAgAQABQACAAGAAcADAAAABAAEAAAAAAAAQIQAAAAKAAAAAQAAAAAAAAADAAAAHRpbWVzdGFtcF9ucwAAAAAIAAwACAAHAAgAAAAAAAABQAAAAP////8YAQAAFAAAAAAAAAAMABYABgAFAAgADAAMAAAAAAMEABgAAABIAAAAAAAAAAAACgAYAAwABAAIAAoAAACcAAAAEAAAAAIAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAAAAAQAAAAAAAAAYAAAAAAAAABAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAEAAAAAAAAAA4AAAAAAAAAAAAAAAAAAAAOAAAAAAAAAAQAAAAAAAAAAAAAAAEAAAAAgAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAQAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAEAAAAAACAAAgAAAAAAIAABAAAAAAAAAAAAAAAAAPg/AAAAAAAAAAAAAAAAAAAEQAAAAAAAAAxAAAAAAAAAEkAAAAAAAAAWQP////8AAAAA";
+
+describe("Arrow IPC sensor parsing", () => {
+  it("preserves int64 timestamps, nulls, and float vectors", () => {
+    const bytes = Uint8Array.from(atob(ARROW_FIXTURE), (character) =>
+      character.charCodeAt(0)
+    );
+    const columns = parseArrowVectorStream(bytes.buffer);
+    expect([...columns.timestampsNs]).toEqual([
+      9_007_199_254_740_993n,
+      9_007_199_254_740_994n
+    ]);
+    expect(columns.x[0]).toBe(1.5);
+    expect(columns.x[1]).toBeNaN();
+    expect([...columns.y]).toEqual([2.5, 3.5]);
+    expect([...columns.z]).toEqual([4.5, 5.5]);
+  });
+
+  it("rejects malformed message lengths", () => {
+    expect(() =>
+      parseArrowVectorStream(new Uint8Array([255, 255, 255, 127]).buffer)
+    ).toThrow("Invalid Arrow message length");
+  });
+});

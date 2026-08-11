@@ -56,10 +56,13 @@ export function closestSample<T extends VectorSample>(
 export function valueExtent(
   samples: readonly VectorSample[]
 ): readonly [number, number] {
-  const values = samples.flatMap((sample) => [sample.x, sample.y, sample.z]);
-  if (values.length === 0) return [-1, 1];
-  const min = Math.min(...values);
-  const max = Math.max(...values);
+  if (samples.length === 0) return [-1, 1];
+  let min = Infinity;
+  let max = -Infinity;
+  for (const sample of samples) {
+    min = Math.min(min, sample.x, sample.y, sample.z);
+    max = Math.max(max, sample.x, sample.y, sample.z);
+  }
   if (min === max) return [min - 1, max + 1];
   const padding = (max - min) * 0.08;
   return [min - padding, max + padding];
