@@ -1,11 +1,15 @@
 {
   "name": "@aeromaint/typescript-export-cli",
   "version": "1.0.0",
-  "private": true,
+  "description": "Reference export CLI for the AeroMaint capture SDK",
+  "license": "MIT",
   "type": "module",
   "bin": {
     "aeromaint-export": "dist/cli.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "lint": "eslint src",
