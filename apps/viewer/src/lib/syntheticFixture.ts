@@ -117,6 +117,7 @@ export function createSyntheticViewerDataSource(
   sensorSampleCount = 64
 ): ViewerDataSource {
   let annotations: Annotation[] = [];
+  let fixtureExport: import("@aeromaint/capture-sdk").ExportJob | undefined;
   const save = (draft: AnnotationDraft, current?: Annotation) => {
     const now = new Date().toISOString();
     const item: Annotation = {
@@ -185,6 +186,23 @@ export function createSyntheticViewerDataSource(
             payload: { version: item.version }
           }))
       ),
+    createExport: (sessionId, startNs, endNs, sensorFormat) => {
+      fixtureExport = {
+        id: crypto.randomUUID(), sessionId, startNs, endNs,
+        windowSemantics: "[start_ns,end_ns)",
+        streamIds: manifest.streams.map(({ id }) => id), sensorFormat,
+        status: "succeeded", progress: 1, statusUrl: "/fixture/export",
+        manifestUrl: "/fixture/export/manifest.json", expiresAt: new Date(Date.now() + 86_400_000).toISOString()
+      };
+      return Promise.resolve(fixtureExport);
+    },
+    getExport: () => fixtureExport ? Promise.resolve(fixtureExport) : Promise.reject(new Error("Export not found")),
+    cancelExport: () => {
+      if (!fixtureExport) return Promise.reject(new Error("Export not found"));
+      fixtureExport = { ...fixtureExport, status: "cancelled", progress: 0 };
+      return Promise.resolve(fixtureExport);
+    },
+    exportFileUrl: (path) => path,
     mediaSources: (_sessionId, stream) =>
       workerMedia
         ? [{ src: `/fixtures/${stream.id}.ivf`, type: "video/x-ivf" }]

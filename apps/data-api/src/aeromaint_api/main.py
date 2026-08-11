@@ -16,7 +16,8 @@ from aeromaint_api.errors import ApiProblem
 from aeromaint_api.errors import problem_response as api_problem_response
 from aeromaint_api.repositories import PostgresImportRepository
 from aeromaint_api.repositories.annotations import InMemoryAnnotationRepository
-from aeromaint_api.repositories.postgres import PostgresAnnotationRepository
+from aeromaint_api.repositories.exports import InMemoryExportRepository
+from aeromaint_api.repositories.postgres import PostgresAnnotationRepository, PostgresExportRepository
 from aeromaint_api.security.audit import AuditSink, InMemoryAppendOnlyAuditSink
 from aeromaint_api.security.auth import Authenticator, DevelopmentJwtAuthenticator
 from aeromaint_api.security.errors import SecurityError
@@ -58,6 +59,7 @@ def create_app(
             application.state.database = database
             application.state.import_repository = PostgresImportRepository(database)
             application.state.annotation_repository = PostgresAnnotationRepository(database)
+            application.state.export_repository = PostgresExportRepository(database)
         yield
 
     application = FastAPI(
@@ -68,6 +70,7 @@ def create_app(
     )
     application.state.session_repository = repository or InMemorySessionRepository()
     application.state.annotation_repository = InMemoryAnnotationRepository()
+    application.state.export_repository = InMemoryExportRepository()
     application.state.authenticator = authenticator
     application.state.audit_sink = audit_sink or InMemoryAppendOnlyAuditSink()
     application.state.rate_limiter = rate_limiter or InMemoryRateLimiter(

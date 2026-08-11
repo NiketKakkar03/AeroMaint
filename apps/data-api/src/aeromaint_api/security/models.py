@@ -15,6 +15,9 @@ class Permission(StrEnum):
     ANNOTATION_DRAFT = "annotation:draft"
     ANNOTATION_REVIEW = "annotation:review"
     ANNOTATION_WRITE = "annotation:write"  # Backwards-compatible capability alias.
+    EXPORT_READ = "export:read"
+    EXPORT_CREATE = "export:create"
+    EXPORT_CANCEL = "export:cancel"
     ANALYSIS_RUN = "analysis:run"
     RECOMMENDATION_APPROVE = "recommendation:approve"
     ADMINISTER = "system:administer"
@@ -29,6 +32,9 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
             Permission.ANNOTATION_DRAFT,
             Permission.ANNOTATION_WRITE,
             Permission.ANALYSIS_RUN,
+            Permission.EXPORT_READ,
+            Permission.EXPORT_CREATE,
+            Permission.EXPORT_CANCEL,
         }
     ),
     Role.ENGINEER: frozenset(
@@ -40,6 +46,9 @@ ROLE_PERMISSIONS: dict[Role, frozenset[Permission]] = {
             Permission.ANNOTATION_WRITE,
             Permission.ANALYSIS_RUN,
             Permission.RECOMMENDATION_APPROVE,
+            Permission.EXPORT_READ,
+            Permission.EXPORT_CREATE,
+            Permission.EXPORT_CANCEL,
         }
     ),
     Role.ADMIN: frozenset(Permission),

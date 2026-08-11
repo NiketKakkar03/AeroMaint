@@ -15,6 +15,8 @@ import type {
   AnnotationReview,
   AnnotationUpdate
 } from "./annotations.js";
+import { exportBody, parseExport } from "./exports.js";
+import type { ExportJob, ExportRequest } from "./exports.js";
 
 export type {
   Annotation,
@@ -23,6 +25,7 @@ export type {
   AnnotationReview,
   AnnotationUpdate
 } from "./annotations.js";
+export type { ExportJob, ExportRequest, ExportStatus } from "./exports.js";
 
 export type { CaptureSessionManifest, CaptureStream, StreamKind, TimestampNs };
 
@@ -839,6 +842,48 @@ export class CaptureClient {
         payload: record(item.payload ?? {}, "Audit payload")
       };
     });
+  }
+
+  public async createExport(
+    request: ExportRequest,
+    options: MutationOptions
+  ): Promise<ExportJob> {
+    const response = await this.#request("/v1/exports", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "idempotency-key": options.idempotencyKey
+      },
+      body: JSON.stringify(exportBody(request)),
+      signal: options.signal ?? null
+    });
+    return parseExport(await response.json());
+  }
+
+  public async getExport(
+    exportId: string,
+    options: RequestOptions = {}
+  ): Promise<ExportJob> {
+    const response = await this.#request(
+      `/v1/exports/${encodeURIComponent(exportId)}`,
+      { signal: options.signal ?? null }
+    );
+    return parseExport(await response.json());
+  }
+
+  public async cancelExport(
+    exportId: string,
+    options: MutationOptions
+  ): Promise<ExportJob> {
+    const response = await this.#request(
+      `/v1/exports/${encodeURIComponent(exportId)}`,
+      {
+        method: "DELETE",
+        headers: { "idempotency-key": options.idempotencyKey },
+        signal: options.signal ?? null
+      }
+    );
+    return parseExport(await response.json());
   }
 
   async #annotationMutation(

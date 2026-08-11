@@ -18,6 +18,7 @@ import { PlaybackControls } from "./features/playback/PlaybackControls.js";
 import { Timeline } from "./features/playback/PlaybackTimeline.js";
 import { SensorPlot } from "./features/sensors/SensorPlot.js";
 import { AnnotationTrack } from "./features/annotations/index.js";
+import { ExportPanel } from "./features/exports/index.js";
 import type { VectorSample } from "./features/sensors/sensorMath.js";
 import { sensorWindow } from "./features/sensors/sensorWindow.js";
 import {
@@ -306,6 +307,12 @@ function SessionViewer({
         startNs={visibleWindow.visibleStartNs}
         endNs={visibleWindow.visibleEndNs}
         playheadNs={playback.currentTimeNs}
+        dataSource={dataSource}
+      />
+      <ExportPanel
+        sessionId={manifest.sessionId}
+        startNs={visibleWindow.visibleStartNs}
+        endNs={visibleWindow.visibleEndNs}
         dataSource={dataSource}
       />
       {sensorStreams.map((stream) => {

@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     jwt_audience: str = "aeromaint-api"
     rate_limit_requests: int = 120
     rate_limit_window_seconds: int = 60
+    export_root: str = "data/exports"
+    export_ttl_seconds: int = 86_400
 
     @model_validator(mode="after")
     def reject_development_secret_in_production(self) -> "Settings":

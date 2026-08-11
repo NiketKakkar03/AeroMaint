@@ -5,7 +5,13 @@ from psycopg.types.json import Jsonb
 
 from aeromaint_api.db import Database
 from aeromaint_api.domain.manifest import CaptureSessionManifest
-from aeromaint_api.repositories.models import Annotation, AuditEvent, ImportJob, ImportStatus
+from aeromaint_api.repositories.models import (
+    Annotation,
+    AuditEvent,
+    ExportJob,
+    ImportJob,
+    ImportStatus,
+)
 
 
 class PostgresSessionRepository:
@@ -113,6 +119,85 @@ class PostgresImportRepository:
             cursor = await connection.execute("SELECT * FROM imports WHERE id = %s", (import_id,))
             row = await cursor.fetchone()
         return None if row is None else ImportJob.model_validate(row)
+
+
+class PostgresExportRepository:
+    def __init__(self, database: Database) -> None:
+        self.database = database
+
+    async def create(self, job: ExportJob) -> tuple[ExportJob, bool]:
+        async with self.database.connection() as connection, connection.transaction():
+            cursor = await connection.execute(
+                """INSERT INTO exports(id,idempotency_key,session_id,actor,start_ns,end_ns,
+                stream_ids,sensor_format,include_annotations,expires_at)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                ON CONFLICT (actor,idempotency_key) DO NOTHING RETURNING *""",
+                (
+                    job.id,
+                    job.idempotency_key,
+                    job.session_id,
+                    job.actor,
+                    job.start_ns,
+                    job.end_ns,
+                    Jsonb(job.stream_ids),
+                    job.sensor_format,
+                    job.include_annotations,
+                    job.expires_at,
+                ),
+            )
+            row = await cursor.fetchone()
+            created = row is not None
+            if row is None:
+                cursor = await connection.execute(
+                    "SELECT * FROM exports WHERE actor=%s AND idempotency_key=%s",
+                    (job.actor, job.idempotency_key),
+                )
+                row = await cursor.fetchone()
+        if row is None:
+            raise RuntimeError("idempotent export row disappeared")
+        return ExportJob.model_validate(row), created
+
+    async def get(self, export_id: UUID) -> ExportJob | None:
+        async with self.database.connection() as connection, connection.transaction():
+            await connection.execute(
+                """UPDATE exports SET status='expired',updated_at=now()
+                WHERE id=%s AND expires_at<=now() AND status NOT IN ('cancelled','expired')""",
+                (export_id,),
+            )
+            cursor = await connection.execute("SELECT * FROM exports WHERE id=%s", (export_id,))
+            row = await cursor.fetchone()
+        return None if row is None else ExportJob.model_validate(row)
+
+    async def update(self, export_id: UUID, **values: object) -> ExportJob | None:
+        allowed = {"status", "progress", "cancel_requested", "manifest", "error"}
+        selected = {key: value for key, value in values.items() if key in allowed}
+        if not selected:
+            return await self.get(export_id)
+        assignments = ",".join(f"{key}=%s" for key in selected)
+        params = [
+            Jsonb(value) if key in {"manifest", "error"} and value is not None else value
+            for key, value in selected.items()
+        ]
+        async with self.database.connection() as connection, connection.transaction():
+            cursor = await connection.execute(
+                f"UPDATE exports SET {assignments},updated_at=now() WHERE id=%s RETURNING *",  # noqa: S608
+                (*params, export_id),
+            )
+            row = await cursor.fetchone()
+        return None if row is None else ExportJob.model_validate(row)
+
+    async def cancel(self, export_id: UUID) -> ExportJob | None:
+        async with self.database.connection() as connection, connection.transaction():
+            cursor = await connection.execute(
+                """UPDATE exports SET cancel_requested=true,status='cancelled',updated_at=now()
+                WHERE id=%s AND status IN ('pending','running','cancelled') RETURNING *""",
+                (export_id,),
+            )
+            row = await cursor.fetchone()
+            if row is None:
+                cursor = await connection.execute("SELECT * FROM exports WHERE id=%s", (export_id,))
+                row = await cursor.fetchone()
+        return None if row is None else ExportJob.model_validate(row)
 
     async def set_status(
         self,
