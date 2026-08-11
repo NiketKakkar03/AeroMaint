@@ -111,23 +111,28 @@ const manifest = parseManifest({
   }
 });
 
-export function createSyntheticViewerDataSource(): ViewerDataSource {
+export function createSyntheticViewerDataSource(
+  workerMedia = false
+): ViewerDataSource {
   return {
     listSessions: () =>
       Promise.resolve([
         { id: manifest.sessionId, manifest, processingStatus: "ready" as const }
       ]),
     getSessionManifest: () => Promise.resolve(manifest),
-    mediaSources: (_sessionId, stream) => [
-      {
-        src: `fixture://${stream.id}`,
-        type: "video/webm; codecs=vp8",
-        synthetic: {
-          label: stream.id === "camera-left" ? "LEFT" : "RIGHT",
-          hue: stream.id === "camera-left" ? 164 : 32
-        }
-      }
-    ],
+    mediaSources: (_sessionId, stream) =>
+      workerMedia
+        ? [{ src: `/fixtures/${stream.id}.ivf`, type: "video/x-ivf" }]
+        : [
+            {
+              src: `fixture://${stream.id}`,
+              type: "video/webm; codecs=vp8",
+              synthetic: {
+                label: stream.id === "camera-left" ? "LEFT" : "RIGHT",
+                hue: stream.id === "camera-left" ? 164 : 32
+              }
+            }
+          ],
     loadVectorSamples: (_sessionId, streamId, startNs, endNs, signal) => {
       if (signal?.aborted)
         return Promise.reject(new DOMException("Aborted", "AbortError"));

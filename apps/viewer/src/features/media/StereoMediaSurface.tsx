@@ -4,9 +4,36 @@ import type {
   CaptureStream
 } from "@aeromaint/contracts";
 import type { PlaybackMetricEvent } from "@aeromaint/observability";
-import { selectDecoderCapability } from "@aeromaint/playback-core";
+import {
+  BoundedFrameQueue,
+  selectDecoderCapability
+} from "@aeromaint/playback-core";
+import type {
+  DecoderRequest,
+  DecoderResponse
+} from "../../workers/media-decoder.worker.js";
 import type { ViewerDataSource } from "../../lib/sdk.js";
 import { SeekCoordinator, timestampInGap } from "../playback/timeline.js";
+
+const mediaBuffers = new Map<string, Promise<ArrayBuffer>>();
+
+function loadMediaBuffer(src: string): Promise<ArrayBuffer> {
+  let pending = mediaBuffers.get(src);
+  if (!pending) {
+    pending = fetch(src)
+      .then((response) => {
+        if (!response.ok)
+          throw new Error(`Media request failed (${String(response.status)})`);
+        return response.arrayBuffer();
+      })
+      .catch((error: unknown) => {
+        mediaBuffers.delete(src);
+        throw error;
+      });
+    mediaBuffers.set(src, pending);
+  }
+  return pending.then((buffer) => buffer.slice(0));
+}
 
 interface Props {
   readonly dataSource: ViewerDataSource;
@@ -15,6 +42,95 @@ interface Props {
   readonly playing: boolean;
   readonly playbackRate: number;
   readonly onMetricEvent?: (event: PlaybackMetricEvent) => void;
+}
+
+function WorkerVideo({
+  src,
+  playheadUs,
+  onError,
+  onReady
+}: {
+  readonly src: string;
+  readonly playheadUs: number;
+  readonly onError: () => void;
+  readonly onReady: () => void;
+}) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const generation = useRef(0);
+  const queue = useRef(
+    new BoundedFrameQueue<{
+      timestampUs: number;
+      frame: VideoFrame;
+      close(): void;
+    }>(12)
+  );
+  const callbacks = useRef({ onError, onReady });
+  callbacks.current = { onError, onReady };
+  const targetUs = useRef(playheadUs);
+  targetUs.current = playheadUs;
+  const seekStartUs = Math.floor(playheadUs / 1_000_000) * 1_000_000;
+
+  useEffect(() => {
+    const current = ++generation.current;
+    const worker = new Worker(
+      new URL("../../workers/media-decoder.worker.ts", import.meta.url),
+      { type: "module" }
+    );
+    const controller = new AbortController();
+    worker.onmessage = (event: MessageEvent<DecoderResponse>) => {
+      if (event.data.generation !== current) {
+        if (event.data.type === "frame") event.data.frame.close();
+        return;
+      }
+      if (event.data.type === "error") callbacks.current.onError();
+      if (event.data.type === "ready") callbacks.current.onReady();
+      if (event.data.type === "frame") {
+        const decodedFrame = event.data.frame;
+        queue.current.push({
+          timestampUs: decodedFrame.timestamp,
+          frame: decodedFrame,
+          close() {
+            decodedFrame.close();
+          }
+        });
+        const frame = queue.current.takeAtOrBefore(targetUs.current);
+        const context = canvas.current?.getContext("2d");
+        const element = canvas.current;
+        if (frame && context && element) {
+          element.width = frame.frame.displayWidth;
+          element.height = frame.frame.displayHeight;
+          context.drawImage(frame.frame, 0, 0);
+          frame.close();
+        }
+      }
+    };
+    void loadMediaBuffer(src)
+      .then((container) => {
+        if (controller.signal.aborted) return;
+        worker.postMessage(
+          {
+            type: "demux",
+            generation: current,
+            container,
+            startUs: seekStartUs
+          } satisfies DecoderRequest,
+          [container]
+        );
+      })
+      .catch((error: unknown) => {
+        if (!(error instanceof DOMException && error.name === "AbortError"))
+          callbacks.current.onError();
+      });
+    return () => {
+      controller.abort();
+      generation.current += 1;
+      queue.current.clear();
+      worker.postMessage({ type: "close" } satisfies DecoderRequest);
+      worker.terminate();
+    };
+  }, [seekStartUs, src]);
+
+  return <canvas ref={canvas} aria-label="WebCodecs decoded media" />;
 }
 
 function MediaPane(
@@ -34,17 +150,21 @@ function MediaPane(
     ? (timestampInGap(playheadNs, stream.gaps) ??
       stream.gaps.find((candidate) => candidate.endNs === playheadNs))
     : undefined;
+  const sources = stream
+    ? dataSource.mediaSources(manifest.sessionId, stream, manifest)
+    : [];
+  const workerSource = sources.find((source) => source.type === "video/x-ivf");
+  const declaredCodec = workerSource
+    ? "vp8"
+    : stream?.schemaRef.match(/(?:avc1|hvc1|hev1|vp09|av01)[^, ]*/)?.[0];
 
   useEffect(() => {
-    const codec = stream?.schemaRef.match(
-      /(?:avc1|hvc1|hev1|vp09|av01)[^, ]*/
-    )?.[0];
-    if (!codec) {
+    if (!declaredCodec) {
       setMediaPath("HTML media fallback");
       return;
     }
     let active = true;
-    void selectDecoderCapability(codec).then((capability) => {
+    void selectDecoderCapability(declaredCodec).then((capability) => {
       if (active)
         setMediaPath(
           capability.mode === "webcodecs"
@@ -55,7 +175,7 @@ function MediaPane(
     return () => {
       active = false;
     };
-  }, [stream]);
+  }, [declaredCodec]);
 
   useEffect(() => {
     const element = video.current;
@@ -100,7 +220,6 @@ function MediaPane(
         <p>No video stream was published.</p>
       </article>
     );
-  const sources = dataSource.mediaSources(manifest.sessionId, stream, manifest);
   const synthetic = sources.find((source) => source.synthetic)?.synthetic;
   const unsupported = sources.some(
     (source) => source.compatibility === "unsupported"
@@ -135,6 +254,18 @@ function MediaPane(
               s
             </span>
           </div>
+        ) : workerSource && mediaPath.startsWith("WebCodecs") ? (
+          <WorkerVideo
+            src={workerSource.src}
+            playheadUs={Number(playheadNs - manifest.startNs) / 1_000}
+            onReady={() => {
+              setState("ready");
+              setMediaPath("WebCodecs worker · IVF demux");
+            }}
+            onError={() => {
+              setState("error");
+            }}
+          />
         ) : (
           <video
             ref={video}

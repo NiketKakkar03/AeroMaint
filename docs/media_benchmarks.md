@@ -53,5 +53,6 @@ stereo presentation updates.
 | Long tasks                      |                0 | informational |
 
 All declared budgets passed. This fixture measures the synchronized synthetic presentation path and
-viewer resource bounds; it does not claim hardware video-decoder throughput. Codec decode, queue
-depth, and real-media buffering remain separate #16 browser gates.
+viewer resource bounds; it does not claim hardware video-decoder throughput. The separate #16
+browser suite encodes VP8 frames, demuxes IVF in a worker, presents transferable `VideoFrame`s through
+a bounded queue, and verifies seek-generation cleanup and the HTML fallback.

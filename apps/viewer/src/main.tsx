@@ -13,10 +13,9 @@ if (root === null) {
 }
 
 const queryClient = new QueryClient();
-const fixtureDataSource = new URLSearchParams(window.location.search).has(
-  "fixture"
-)
-  ? createSyntheticViewerDataSource()
+const fixtureMode = new URLSearchParams(window.location.search).get("fixture");
+const fixtureDataSource = fixtureMode
+  ? createSyntheticViewerDataSource(fixtureMode === "webcodecs")
   : undefined;
 
 createRoot(root).render(
