@@ -8,7 +8,8 @@ import type {
 import type { ExportJob } from "@aeromaint/capture-sdk";
 import type {
   CaptureSessionManifest,
-  CaptureStream
+  CaptureStream,
+  ModelTrack
 } from "@aeromaint/contracts";
 import type { VectorSample } from "../features/sensors/sensorMath.js";
 import { WindowCache } from "@aeromaint/timeline-renderer";
@@ -115,6 +116,7 @@ export interface ViewerDataSource {
     sessionId: string,
     signal?: AbortSignal
   ): Promise<CaptureSessionManifest>;
+  getModelTrack(sessionId: string, signal?: AbortSignal): Promise<ModelTrack>;
   mediaSources(
     sessionId: string,
     stream: CaptureStream,
@@ -233,6 +235,8 @@ export function createViewerDataSource(
     },
     getSessionManifest: (sessionId, signal) =>
       client.getSessionManifest(sessionId, signal),
+    getModelTrack: (sessionId, signal) =>
+      client.getModelTrack(sessionId, signal ? { signal } : {}),
     listAnnotations: (sessionId, signal) =>
       client.listAnnotations(sessionId, signal ? { signal } : {}),
     createAnnotation: (sessionId, draft) =>

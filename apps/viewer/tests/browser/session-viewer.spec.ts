@@ -22,6 +22,14 @@ test("session library drives synchronized stereo media and timestamp deep links"
   await expect(page.getByRole("heading", { name: "imu-main" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "pose-main" })).toBeVisible();
   await expect(page.getByText("Data: raw")).toHaveCount(2);
+  await expect(
+    page.getByRole("heading", { name: "Engine health" })
+  ).toBeVisible();
+  await expect(page.getByText(/142\.0 cycles RUL/)).toBeVisible();
+  await expect(
+    page.getByText(/uncertainty 125\.0–159\.0 cycles/)
+  ).toBeVisible();
+  await expect(page.getByLabel("RUL and anomaly timeline")).toBeVisible();
   await expect(page.locator('[data-virtualized-track="true"]')).toHaveCount(2);
   await page.getByLabel("Playback rate").selectOption("2");
   await expect(page.getByLabel("Playback rate")).toHaveValue("2");

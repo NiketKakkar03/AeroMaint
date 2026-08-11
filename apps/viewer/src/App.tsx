@@ -19,6 +19,7 @@ import { Timeline } from "./features/playback/PlaybackTimeline.js";
 import { SensorPlot } from "./features/sensors/SensorPlot.js";
 import { AnnotationTrack } from "./features/annotations/index.js";
 import { ExportPanel } from "./features/exports/index.js";
+import { HealthTrack } from "./features/health/index.js";
 import type { VectorSample } from "./features/sensors/sensorMath.js";
 import { sensorWindow } from "./features/sensors/sensorWindow.js";
 import {
@@ -301,6 +302,12 @@ function SessionViewer({
             nowNs: nowNs()
           });
         }}
+      />
+      <HealthTrack
+        sessionId={manifest.sessionId}
+        load={(sessionId, signal) =>
+          dataSource.getModelTrack(sessionId, signal)
+        }
       />
       <AnnotationTrack
         sessionId={manifest.sessionId}

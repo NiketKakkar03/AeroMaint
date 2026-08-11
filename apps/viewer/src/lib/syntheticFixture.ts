@@ -150,6 +150,51 @@ export function createSyntheticViewerDataSource(
         { id: manifest.sessionId, manifest, processingStatus: "ready" as const }
       ]),
     getSessionManifest: () => Promise.resolve(manifest),
+    getModelTrack: () =>
+      Promise.resolve({
+        schemaVersion: "1.0.0" as const,
+        artifactId: "prediction-fixture-v1",
+        engineId: "ENG-FIXTURE",
+        sessionId: manifest.sessionId,
+        createdAt: "2026-08-11T00:00:00Z",
+        versions: {
+          model: "fixture-1",
+          features: "fixture-1",
+          data: "fixture-1",
+          code: "fixture-1"
+        },
+        points: [
+          {
+            timestampNs: manifest.startNs,
+            status: "insufficient_history" as const,
+            rul: null,
+            rulUnit: "cycles" as const,
+            interval: null,
+            horizon: 30,
+            horizonUnit: "cycles" as const,
+            anomalyScore: null,
+            anomalySeverity: "none" as const,
+            reason: "requires at least 3 observations",
+            oodFeatures: [],
+            attribution: []
+          },
+          {
+            timestampNs: manifest.endNs,
+            status: "ok" as const,
+            rul: 142,
+            rulUnit: "cycles" as const,
+            interval: [125, 159] as const,
+            horizon: 30,
+            horizonUnit: "cycles" as const,
+            anomalyScore: 1.2,
+            anomalySeverity: "none" as const,
+            oodFeatures: [],
+            attribution: [
+              { feature: "vibration", contribution: -1.4, unit: "cycles" }
+            ]
+          }
+        ]
+      }),
     listAnnotations: () => Promise.resolve(annotations),
     createAnnotation: (_sessionId, draft) => Promise.resolve(save(draft)),
     updateAnnotation: (_sessionId, id, update) => {

@@ -1,11 +1,13 @@
 import {
   CAPTURE_MANIFEST_SCHEMA_VERSION,
   ManifestValidationError,
+  parseModelTrack,
   parseManifest,
   type CaptureSessionManifest,
   type CaptureStream,
   type StreamKind,
-  type TimestampNs
+  type TimestampNs,
+  type ModelTrack
 } from "@aeromaint/contracts";
 import { annotationBody, parseAnnotation } from "./annotations.js";
 import type {
@@ -28,6 +30,25 @@ export type {
 export type { ExportJob, ExportRequest, ExportStatus } from "./exports.js";
 
 export type { CaptureSessionManifest, CaptureStream, StreamKind, TimestampNs };
+export type { ModelTrack } from "@aeromaint/contracts";
+
+export interface FleetHealthItem {
+  readonly engineId: string;
+  readonly sessionId: string;
+  readonly status: "ok" | "insufficient_history" | "ood";
+  readonly rul: number | null;
+  readonly rulUnit: "cycles" | "hours";
+  readonly interval: readonly [number, number] | null;
+  readonly anomalyScore: number | null;
+  readonly anomalySeverity: "none" | "warning" | "critical";
+  readonly artifactId: string;
+}
+
+export interface FleetHealth {
+  readonly items: readonly FleetHealthItem[];
+  readonly ranking: "lowest_rul_first";
+  readonly rulUnit: "cycles" | "hours";
+}
 
 export type CaptureSdkErrorCode =
   | "aborted"
@@ -459,6 +480,79 @@ export class CaptureClient {
         DEFAULT_RETRY.maxDelayMs,
         "maxDelayMs"
       )
+    };
+  }
+
+  /** Public model-track contract; viewers never call private ML services. */
+  public async getModelTrack(
+    sessionId: string,
+    options: RequestOptions & { readonly engineId?: string } = {}
+  ): Promise<ModelTrack> {
+    const path = addQuery(
+      `/v1/health/sessions/${encodeURIComponent(sessionId)}/model-track`,
+      { engine_id: options.engineId }
+    );
+    return parseModelTrack(
+      await (
+        await this.#request(path, { signal: options.signal ?? null })
+      ).json()
+    );
+  }
+
+  public async getFleetHealth(
+    options: RequestOptions = {}
+  ): Promise<FleetHealth> {
+    const payload = record(
+      await (
+        await this.#request("/v1/health/fleet", {
+          signal: options.signal ?? null
+        })
+      ).json(),
+      "Fleet health"
+    );
+    if (!Array.isArray(payload.items))
+      throw new CaptureSdkError(
+        "Fleet health items must be an array",
+        "invalid_response"
+      );
+    const items = payload.items.map((value): FleetHealthItem => {
+      const item = record(value, "Fleet health item");
+      const interval = item.interval;
+      return {
+        engineId: stringField(item.engine_id, "Engine id"),
+        sessionId: stringField(item.session_id, "Session id"),
+        status: stringField(
+          item.status,
+          "Prediction status"
+        ) as FleetHealthItem["status"],
+        rul: item.rul === null ? null : Number(item.rul),
+        rulUnit: stringField(
+          item.rul_unit,
+          "RUL unit"
+        ) as FleetHealthItem["rulUnit"],
+        interval:
+          interval === null
+            ? null
+            : [
+                Number((interval as unknown[])[0]),
+                Number((interval as unknown[])[1])
+              ],
+        anomalyScore:
+          item.anomaly_score === null ? null : Number(item.anomaly_score),
+        anomalySeverity: stringField(
+          item.anomaly_severity,
+          "Anomaly severity"
+        ) as FleetHealthItem["anomalySeverity"],
+        artifactId: stringField(item.artifact_id, "Artifact id")
+      };
+    });
+    return {
+      items,
+      ranking: "lowest_rul_first",
+      rulUnit: stringField(
+        payload.rul_unit,
+        "Fleet RUL unit"
+      ) as FleetHealth["rulUnit"]
     };
   }
 

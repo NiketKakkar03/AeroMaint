@@ -22,6 +22,32 @@ const fixture: Record<string, unknown> = JSON.parse(
 afterEach(() => vi.useRealTimers());
 
 describe("CaptureClient", () => {
+  it("loads health predictions through the versioned public model-track contract", async () => {
+    const modelTrack: unknown = JSON.parse(
+      readFileSync(
+        new URL(
+          "../../../tests/contract/health/model-track-v1.json",
+          import.meta.url
+        ),
+        "utf8"
+      )
+    );
+    const fetch = vi
+      .fn<typeof globalThis.fetch>()
+      .mockResolvedValue(Response.json(modelTrack));
+    const client = new CaptureClient({ baseUrl: "https://api.test", fetch });
+
+    const track = await client.getModelTrack("session/101", {
+      engineId: "ENG-101"
+    });
+
+    expect(track.points[0]?.timestampNs).toBe(9_007_199_254_740_993n);
+    expect(track.points[0]?.status).toBe("insufficient_history");
+    expect(track.points[1]?.interval).toEqual([105.6, 134.4]);
+    expect(fetch.mock.calls[0]?.[0]).toContain(
+      "/v1/health/sessions/session%2F101/model-track?engine_id=ENG-101"
+    );
+  });
   it("sends annotation optimistic concurrency and parses canonical timestamps", async () => {
     const item = {
       id: "annotation-1",

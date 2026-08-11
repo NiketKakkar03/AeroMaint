@@ -11,6 +11,47 @@
   font-synthesis: none;
 }
 
+.health-track {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #334155;
+  border-radius: 0.75rem;
+  background: #101827;
+}
+.health-track header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: end;
+}
+.health-overlay {
+  display: flex;
+  gap: 0.35rem;
+  height: 2rem;
+  align-items: end;
+  margin: 0.75rem 0;
+  border-bottom: 1px solid #64748b;
+}
+.health-point {
+  flex: 1;
+  min-width: 0.5rem;
+  height: 0.75rem;
+  background: #38bdf8;
+  border-radius: 0.2rem 0.2rem 0 0;
+}
+.health-point.warning {
+  height: 1.25rem;
+  background: #f59e0b;
+}
+.health-point.critical {
+  height: 1.75rem;
+  background: #ef4444;
+}
+.health-attribution {
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
 * {
   box-sizing: border-box;
 }

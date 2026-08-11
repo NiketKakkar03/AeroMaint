@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0.0",
+  "artifact_id": "prediction-golden-v1",
+  "engine_id": "ENG-101",
+  "session_id": "session-101",
+  "created_at": "2026-08-11T00:00:00Z",
+  "versions": {
+    "model": "rul-linear-1",
+    "features": "health-core-1",
+    "data": "capture-v1",
+    "code": "health-service-1"
+  },
+  "points": [
+    {
+      "timestamp_ns": "9007199254740993",
+      "status": "insufficient_history",
+      "rul": null,
+      "rul_unit": "cycles",
+      "interval": null,
+      "horizon": 30,
+      "horizon_unit": "cycles",
+      "anomaly_score": null,
+      "anomaly_severity": "none",
+      "reason": "requires at least 3 observations",
+      "ood_features": [],
+      "attribution": []
+    },
+    {
+      "timestamp_ns": "9007199254740994",
+      "status": "ok",
+      "rul": 120.0,
+      "rul_unit": "cycles",
+      "interval": [105.6, 134.4],
+      "horizon": 30,
+      "horizon_unit": "cycles",
+      "anomaly_score": 1.5,
+      "anomaly_severity": "none",
+      "ood_features": [],
+      "attribution": [
+        { "feature": "vibration", "contribution": -2.0, "unit": "cycles" }
+      ]
+    }
+  ]
+}

@@ -406,3 +406,16 @@ export function parseManifest(value: unknown): CaptureSessionManifest {
 
 export { frameAtOrBefore, mapToSessionTime, nearestFrame } from "./clock.js";
 export type { IndexedFrame } from "./clock.js";
+export {
+  MODEL_TRACK_SCHEMA_VERSION,
+  ModelTrackValidationError,
+  parseModelTrack
+} from "./model-track.js";
+export type {
+  AnomalySeverity,
+  FeatureAttribution,
+  ModelTrack,
+  ModelTrackPoint,
+  ModelVersions,
+  PredictionStatus
+} from "./model-track.js";
