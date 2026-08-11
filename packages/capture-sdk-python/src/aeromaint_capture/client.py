@@ -6,11 +6,11 @@ from collections.abc import Callable, Iterator, Mapping
 from threading import Event
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen
 
 from .errors import CaptureError, CaptureHttpError, CaptureTransportError, Problem
-from .models import Page, SensorSample, SensorWindow, SessionSummary, StreamSummary
+from .models import ImuSample, ImuWindow, Page, SensorSample, SensorWindow, SessionSummary, StreamSummary
 
 Open = Callable[..., Any]
 
@@ -102,6 +102,7 @@ class CaptureClient:
     def list_sessions(
         self, *, cursor: str | None = None, limit: int = 50, cancel: Event | None = None
     ) -> Page[SessionSummary]:
+        self._validate_limit(limit)
         raw = self._get(self._path("/v1/sessions", cursor=cursor, limit=limit), cancel)
         return Page(
             tuple(
@@ -118,6 +119,8 @@ class CaptureClient:
     def iter_sessions(
         self, *, page_size: int = 50, max_items: int = 1000, cancel: Event | None = None
     ) -> Iterator[SessionSummary]:
+        self._validate_limit(page_size)
+        self._validate_limit(max_items)
         cursor = None
         emitted = 0
         while emitted < max_items:
@@ -133,7 +136,8 @@ class CaptureClient:
         self, session_id: str, *, cursor: str | None = None, limit: int = 50,
         cancel: Event | None = None,
     ) -> Page[StreamSummary]:
-        raw = self._get(self._path(f"/v1/sessions/{session_id}/streams", cursor=cursor, limit=limit), cancel)
+        self._validate_limit(limit)
+        raw = self._get(self._path(f"/v1/sessions/{quote(session_id, safe='')}/streams", cursor=cursor, limit=limit), cancel)
         return Page(tuple(StreamSummary(
             id=str(item["id"]), kind=str(item["kind"]), start_ns=int(item["start_ns"]),
             end_ns=int(item["end_ns"]), schema_ref=item.get("schema_ref")
@@ -145,8 +149,9 @@ class CaptureClient:
     ) -> SensorWindow:
         if start_ns >= end_ns:
             raise ValueError("end_ns must be greater than start_ns; windows are [start_ns,end_ns)")
+        self._validate_limit(limit)
         raw = self._get(self._path(
-            f"/v1/sessions/{session_id}/streams/{stream_id}/samples",
+            f"/v1/sessions/{quote(session_id, safe='')}/streams/{quote(stream_id, safe='')}/samples",
             start_ns=start_ns, end_ns=end_ns, cursor=cursor, limit=limit,
         ), cancel)
         window = raw.get("range", {})
@@ -157,3 +162,32 @@ class CaptureClient:
             schema_ref=raw.get("schema_ref"), next_cursor=raw.get("next_cursor"),
             downsampled=bool(raw.get("downsampling", {}).get("applied", False)),
         )
+
+    def get_imu_window(
+        self, session_id: str, stream_id: str, *, start_ns: int, end_ns: int,
+        cursor: str | None = None, limit: int = 100, cancel: Event | None = None,
+    ) -> ImuWindow:
+        """Return a typed IMU window while retaining any additive wire fields."""
+        window = self.get_sensor_window(
+            session_id, stream_id, start_ns=start_ns, end_ns=end_ns,
+            cursor=cursor, limit=limit, cancel=cancel,
+        )
+        samples: list[ImuSample] = []
+        for sample in window.samples:
+            try:
+                ax, ay, az = (float(sample.values[key]) for key in ("ax", "ay", "az"))
+            except (KeyError, TypeError, ValueError) as error:
+                raise CaptureError(
+                    "IMU sample values must contain numeric ax, ay, and az",
+                    code="INVALID_RESPONSE",
+                ) from error
+            samples.append(ImuSample(sample.timestamp_ns, ax, ay, az, sample.values))
+        return ImuWindow(
+            window.session_id, window.stream_id, window.start_ns, window.end_ns,
+            tuple(samples), window.schema_ref, window.next_cursor, window.downsampled,
+        )
+
+    @staticmethod
+    def _validate_limit(value: int) -> None:
+        if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+            raise ValueError("pagination limits must be positive integers")

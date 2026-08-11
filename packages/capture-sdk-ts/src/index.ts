@@ -711,16 +711,20 @@ export class CaptureClient {
     if (contentType === "application/json" || contentType.endsWith("+json")) {
       const payload: unknown = await response.json();
       const root = record(payload, "Sample range");
+      const range =
+        typeof root.range === "object" && root.range !== null
+          ? record(root.range, "Sample range metadata")
+          : root;
       const nextCursor = optionalString(root.next_cursor ?? root.nextCursor);
       return {
         sessionId,
         streamId,
         startNs: timestamp(
-          root.start_ns ?? request.startNs.toString(),
+          range.start_ns ?? root.start_ns ?? request.startNs.toString(),
           "Sample range start_ns"
         ),
         endNs: timestamp(
-          root.end_ns ?? request.endNs.toString(),
+          range.end_ns ?? root.end_ns ?? request.endNs.toString(),
           "Sample range end_ns"
         ),
         contentType,

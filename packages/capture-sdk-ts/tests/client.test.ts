@@ -238,6 +238,8 @@ describe("CaptureClient", () => {
     });
 
     expect(Array.isArray(range.data)).toBe(true);
+    expect(range.startNs).toBe(9_007_199_254_740_993n);
+    expect(range.endNs).toBe(9_007_199_454_740_993n);
     expect(range.data).toEqual([
       {
         timestamp_ns: 9_007_199_254_740_993n,

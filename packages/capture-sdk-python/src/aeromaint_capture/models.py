@@ -36,12 +36,35 @@ class SensorSample:
 
 
 @dataclass(frozen=True, slots=True)
+class ImuSample:
+    """Canonical typed IMU sample. Extra vendor fields remain available in ``values``."""
+
+    timestamp_ns: int
+    ax: float
+    ay: float
+    az: float
+    values: dict[str, object]
+
+
+@dataclass(frozen=True, slots=True)
 class SensorWindow:
     session_id: str
     stream_id: str
     start_ns: int
     end_ns: int
     samples: tuple[SensorSample, ...]
+    schema_ref: str | None
+    next_cursor: str | None
+    downsampled: bool
+
+
+@dataclass(frozen=True, slots=True)
+class ImuWindow:
+    session_id: str
+    stream_id: str
+    start_ns: int
+    end_ns: int
+    samples: tuple[ImuSample, ...]
     schema_ref: str | None
     next_cursor: str | None
     downsampled: bool

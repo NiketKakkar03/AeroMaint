@@ -15,6 +15,9 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "test:sdk-pack": "node tests/contract/sdk-ts/run-packed-smoke.mjs",
+    "test:sdk-python": "PYTHONPATH=packages/capture-sdk-python/src python3 -m unittest discover -s packages/capture-sdk-python/tests -v",
+    "test:sdk-python-pack": "sh tests/contract/sdk-python/run-packed-smoke.sh",
+    "test:sdk-react-pack": "node tests/contract/sdk-react/run-packed-smoke.mjs",
     "typecheck": "turbo run typecheck",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test"
   },
