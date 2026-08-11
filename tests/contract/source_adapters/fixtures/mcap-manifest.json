@@ -1,0 +1,173 @@
+{
+  "artifacts": [
+    {
+      "id": "sha256-f4e3f0b04771c047e227c9ecaba65d3fe2fd0e1eee0a7552b956d1a7c535a7cf",
+      "logical_key": "sessions/mcap-2f61fdc052c7b74c2d0f0bed/camera-left/frames/0.bin",
+      "media_type": "application/octet-stream",
+      "sha256": "f4e3f0b04771c047e227c9ecaba65d3fe2fd0e1eee0a7552b956d1a7c535a7cf",
+      "size_bytes": 4
+    },
+    {
+      "id": "sha256-22dfb28ce03d3069836819d5575ea8e81aa1d1471452f14828346e1738f22bd7",
+      "logical_key": "sessions/mcap-2f61fdc052c7b74c2d0f0bed/camera-left/index.json",
+      "media_type": "application/vnd.aeromaint.frame-index+json",
+      "sha256": "22dfb28ce03d3069836819d5575ea8e81aa1d1471452f14828346e1738f22bd7",
+      "size_bytes": 481
+    },
+    {
+      "id": "sha256-c4b09ae6c594a26b027aa72f8a3255317e7d024b5877999e1e335d08f215405a",
+      "logical_key": "sessions/mcap-2f61fdc052c7b74c2d0f0bed/imu-main/records.ndjson",
+      "media_type": "application/x-ndjson",
+      "sha256": "c4b09ae6c594a26b027aa72f8a3255317e7d024b5877999e1e335d08f215405a",
+      "size_bytes": 504
+    },
+    {
+      "id": "sha256-df0a0bb1c3fba072988e480615e210cd7b95802437ada96cca8632c5f44ea63d",
+      "logical_key": "sessions/mcap-2f61fdc052c7b74c2d0f0bed/pose-ground-truth/records.ndjson",
+      "media_type": "application/x-ndjson",
+      "sha256": "df0a0bb1c3fba072988e480615e210cd7b95802437ada96cca8632c5f44ea63d",
+      "size_bytes": 243
+    },
+    {
+      "id": "sha256-b8c0ad544da5f464dcba27dbb263b0a58e6b9029bd12144dd442d30546f90b06",
+      "logical_key": "sessions/mcap-2f61fdc052c7b74c2d0f0bed/maintenance-events/records.ndjson",
+      "media_type": "application/x-ndjson",
+      "sha256": "b8c0ad544da5f464dcba27dbb263b0a58e6b9029bd12144dd442d30546f90b06",
+      "size_bytes": 247
+    }
+  ],
+  "calibrations": [],
+  "clocks": [
+    {
+      "id": "ros",
+      "rate_denominator": 1,
+      "rate_numerator": 1,
+      "session_epoch_ns": "0",
+      "source_epoch_ns": "1700000000000000000"
+    }
+  ],
+  "display_name": "ROS 2 MCAP ros2-mini",
+  "end_ns": "30000000",
+  "provenance": {
+    "adapter": "aeromaint-mcap",
+    "adapter_version": "1.0.0",
+    "source_metadata": {
+      "library": "aeromaint-fixture/1.0",
+      "profile": "ros2",
+      "topics": [
+        {
+          "frame_ids": [
+            "camera_left_optical"
+          ],
+          "name": "/camera/left/image_raw",
+          "type": "sensor_msgs/msg/Image",
+          "units": {}
+        },
+        {
+          "frame_ids": [
+            "imu_link"
+          ],
+          "name": "/imu/data",
+          "type": "sensor_msgs/msg/Imu",
+          "units": {
+            "angular_velocity": "rad/s",
+            "linear_acceleration": "m/s^2"
+          }
+        },
+        {
+          "frame_ids": [
+            "map"
+          ],
+          "name": "/localization/pose",
+          "type": "geometry_msgs/msg/PoseStamped",
+          "units": {
+            "position": "m"
+          }
+        },
+        {
+          "frame_ids": [
+            "airframe"
+          ],
+          "name": "/maintenance/events",
+          "type": "aeromaint_msgs/msg/Event",
+          "units": {}
+        }
+      ],
+      "unsupported_topics": [
+        {
+          "diagnostic": "unsupported ROS 2 schema 'std_msgs/msg/String' on topic '/debug/text'; supported: aeromaint_msgs/msg/Event, geometry_msgs/msg/PoseStamped, sensor_msgs/msg/Image, sensor_msgs/msg/Imu",
+          "message_encoding": "cdr",
+          "schema": "std_msgs/msg/String",
+          "schema_encoding": "ros2msg",
+          "topic": "/debug/text"
+        }
+      ]
+    },
+    "source_sha256": "2f61fdc052c7b74c2d0f0bedcb80bb209cda37bd5839bfbbcac079c5bd4ce4bf",
+    "source_type": "ros2-mcap",
+    "source_uri": "fixture://mcap-mini"
+  },
+  "schema_version": "1.0.0",
+  "session_clock_id": "ros",
+  "session_id": "mcap-2f61fdc052c7b74c2d0f0bed",
+  "start_ns": "0",
+  "streams": [
+    {
+      "artifact_ids": [
+        "sha256-22dfb28ce03d3069836819d5575ea8e81aa1d1471452f14828346e1738f22bd7",
+        "sha256-f4e3f0b04771c047e227c9ecaba65d3fe2fd0e1eee0a7552b956d1a7c535a7cf"
+      ],
+      "calibration_ids": [],
+      "clock_id": "ros",
+      "end_ns": "0",
+      "gaps": [],
+      "id": "camera-left",
+      "kind": "video",
+      "sample_count": 1,
+      "schema_ref": "aeromaint://schemas/video-frame-index/1.0.0",
+      "start_ns": "0"
+    },
+    {
+      "artifact_ids": [
+        "sha256-c4b09ae6c594a26b027aa72f8a3255317e7d024b5877999e1e335d08f215405a"
+      ],
+      "calibration_ids": [],
+      "clock_id": "ros",
+      "end_ns": "10000000",
+      "gaps": [],
+      "id": "imu-main",
+      "kind": "imu",
+      "sample_count": 1,
+      "schema_ref": "aeromaint://schemas/imu/1.0.0",
+      "start_ns": "10000000"
+    },
+    {
+      "artifact_ids": [
+        "sha256-df0a0bb1c3fba072988e480615e210cd7b95802437ada96cca8632c5f44ea63d"
+      ],
+      "calibration_ids": [],
+      "clock_id": "ros",
+      "end_ns": "20000000",
+      "gaps": [],
+      "id": "pose-ground-truth",
+      "kind": "pose",
+      "sample_count": 1,
+      "schema_ref": "aeromaint://schemas/pose/1.0.0",
+      "start_ns": "20000000"
+    },
+    {
+      "artifact_ids": [
+        "sha256-b8c0ad544da5f464dcba27dbb263b0a58e6b9029bd12144dd442d30546f90b06"
+      ],
+      "calibration_ids": [],
+      "clock_id": "ros",
+      "end_ns": "30000000",
+      "gaps": [],
+      "id": "maintenance-events",
+      "kind": "event",
+      "sample_count": 1,
+      "schema_ref": "aeromaint://schemas/event/1.0.0",
+      "start_ns": "30000000"
+    }
+  ]
+}
