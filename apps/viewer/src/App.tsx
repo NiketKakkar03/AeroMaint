@@ -18,6 +18,7 @@ import { PlaybackControls } from "./features/playback/PlaybackControls.js";
 import { Timeline } from "./features/playback/PlaybackTimeline.js";
 import { SensorPlot } from "./features/sensors/SensorPlot.js";
 import type { VectorSample } from "./features/sensors/sensorMath.js";
+import { sensorWindow } from "./features/sensors/sensorWindow.js";
 import {
   timestampFromUrl,
   urlWithTimestamp
@@ -87,52 +88,84 @@ function SessionViewer({
       return state;
     }
   );
-  const [sensorSamples, setSensorSamples] = useState<readonly VectorSample[]>(
-    []
-  );
-  const [sensorState, setSensorState] = useState<"loading" | "ready" | "error">(
-    "loading"
-  );
+  const [sensorTracks, setSensorTracks] = useState<
+    Readonly<
+      Record<
+        string,
+        {
+          readonly state: "loading" | "ready" | "error";
+          readonly samples: readonly VectorSample[];
+        }
+      >
+    >
+  >({});
+  const [zoom, setZoom] = useState(1);
   const metrics = useRef(new PlaybackMetricsCollector(performance.now()));
   const startedAt = useRef(performance.now());
   const [report, setReport] = useState<ViewerBenchmarkReport>();
   const playing = playback.status === "playing";
-  const sensorStream = manifest.streams.find(
-    (stream) => stream.kind !== "video"
+  const sensorStreams = useMemo(
+    () =>
+      manifest.streams.filter(
+        (stream) => stream.kind === "imu" || stream.kind === "pose"
+      ),
+    [manifest.streams]
+  );
+  const visibleWindow = sensorWindow(
+    manifest.startNs,
+    manifest.endNs,
+    playback.currentTimeNs,
+    zoom
   );
   const gaps = manifest.streams.flatMap((stream) => stream.gaps);
   const recordMetric = (event: PlaybackMetricEvent) => {
     metrics.current.record(event);
   };
   useEffect(() => {
-    if (!sensorStream) {
-      setSensorSamples([]);
-      setSensorState("ready");
-      return;
-    }
+    if (sensorStreams.length === 0) return;
     const controller = new AbortController();
-    setSensorState("loading");
-    void dataSource
-      .loadVectorSamples(
-        manifest.sessionId,
-        sensorStream.id,
-        sensorStream.startNs,
-        sensorStream.endNs,
-        controller.signal
+    setSensorTracks((current) =>
+      Object.fromEntries(
+        sensorStreams.map((stream) => [
+          stream.id,
+          { state: "loading", samples: current[stream.id]?.samples ?? [] }
+        ])
       )
-      .then(
-        (samples) => {
-          setSensorSamples(samples);
-          setSensorState("ready");
-        },
-        () => {
-          if (!controller.signal.aborted) setSensorState("error");
-        }
-      );
+    );
+    for (const stream of sensorStreams)
+      void dataSource
+        .loadVectorSamples(
+          manifest.sessionId,
+          stream.id,
+          visibleWindow.requestStartNs,
+          visibleWindow.requestEndNs,
+          controller.signal
+        )
+        .then(
+          (samples) => {
+            setSensorTracks((current) => ({
+              ...current,
+              [stream.id]: { state: "ready", samples }
+            }));
+          },
+          () => {
+            if (!controller.signal.aborted)
+              setSensorTracks((current) => ({
+                ...current,
+                [stream.id]: { state: "error", samples: [] }
+              }));
+          }
+        );
     return () => {
       controller.abort();
     };
-  }, [dataSource, manifest.sessionId, sensorStream]);
+  }, [
+    dataSource,
+    manifest.sessionId,
+    sensorStreams,
+    visibleWindow.requestEndNs,
+    visibleWindow.requestStartNs
+  ]);
   useEffect(() => {
     const monitor = observeBrowserResources(metrics.current);
     const update = () => {
@@ -204,6 +237,7 @@ function SessionViewer({
         manifest={manifest}
         playheadNs={playback.currentTimeNs}
         playing={playing}
+        playbackRate={playback.playbackRate}
         onPlayingChange={(next) => {
           dispatchPlayback({ type: next ? "play" : "pause", nowNs: nowNs() });
         }}
@@ -220,9 +254,30 @@ function SessionViewer({
             nowNs: nowNs()
           });
         }}
+        onRateChange={(rate) => {
+          dispatchPlayback({ type: "set-rate", rate, nowNs: nowNs() });
+        }}
+        loopEnabled={playback.loopRange !== null}
+        onLoopChange={(enabled) => {
+          dispatchPlayback({
+            type: "set-loop",
+            range: enabled
+              ? {
+                  startNs: visibleWindow.visibleStartNs,
+                  endNs: visibleWindow.visibleEndNs
+                }
+              : null,
+            nowNs: nowNs()
+          });
+        }}
+        zoom={zoom}
+        onZoomChange={setZoom}
       />
       <Timeline
-        range={{ startNs: manifest.startNs, endNs: manifest.endNs }}
+        range={{
+          startNs: visibleWindow.visibleStartNs,
+          endNs: visibleWindow.visibleEndNs
+        }}
         currentTimeNs={playback.currentTimeNs}
         gaps={gaps}
         onTogglePlayback={() => {
@@ -245,15 +300,18 @@ function SessionViewer({
           });
         }}
       />
-      {sensorStream ? (
-        sensorState === "ready" ? (
+      {sensorStreams.map((stream) => {
+        const track = sensorTracks[stream.id];
+        return track?.state === "ready" ? (
           <SensorPlot
-            title={sensorStream.id}
-            unit="stream units"
-            samples={sensorSamples}
-            gaps={sensorStream.gaps}
-            startNs={sensorStream.startNs}
-            endNs={sensorStream.endNs}
+            key={stream.id}
+            title={stream.id}
+            unit={stream.kind === "imu" ? "m/s²" : "m / degrees"}
+            dataState="raw"
+            samples={track.samples}
+            gaps={stream.gaps}
+            startNs={visibleWindow.visibleStartNs}
+            endNs={visibleWindow.visibleEndNs}
             selectedTimeNs={playback.currentTimeNs}
             onSelectTime={(currentTimeNs) => {
               dispatchPlayback({
@@ -270,13 +328,16 @@ function SessionViewer({
             }}
           />
         ) : (
-          <p role={sensorState === "error" ? "alert" : "status"}>
-            {sensorState === "error"
-              ? "Sensor samples could not be loaded."
-              : "Loading sensor samples…"}
+          <p
+            key={stream.id}
+            role={track?.state === "error" ? "alert" : "status"}
+          >
+            {track?.state === "error"
+              ? `${stream.id} samples could not be loaded.`
+              : `Loading ${stream.id} samples…`}
           </p>
-        )
-      ) : null}
+        );
+      })}
       {report ? (
         <DiagnosticsPanel report={report} onExport={downloadBenchmarkReport} />
       ) : null}

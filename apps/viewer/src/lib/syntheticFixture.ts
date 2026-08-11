@@ -2,6 +2,11 @@ import { parseManifest } from "@aeromaint/contracts";
 import type { ViewerDataSource } from "./sdk.js";
 
 const BASE_NS = 9_007_199_254_740_993n;
+declare global {
+  interface Window {
+    __AEROMAINT_FIXTURE_REQUESTS__?: { started: number; aborted: number };
+  }
+}
 const manifest = parseManifest({
   schema_version: "1.0.0",
   session_id: "synthetic-stereo",
@@ -65,6 +70,36 @@ const manifest = parseManifest({
       artifact_ids: ["right-media"],
       calibration_ids: [],
       gaps: []
+    },
+    {
+      id: "imu-main",
+      kind: "imu",
+      clock_id: "session",
+      start_ns: BASE_NS.toString(),
+      end_ns: (BASE_NS + 10_000_000_000n).toString(),
+      sample_count: 2_000,
+      schema_ref: "aeromaint://schemas/imu/1.0.0",
+      artifact_ids: [],
+      calibration_ids: [],
+      gaps: [
+        {
+          start_ns: (BASE_NS + 4_000_000_000n).toString(),
+          end_ns: (BASE_NS + 5_000_000_000n).toString(),
+          reason: "missing"
+        }
+      ]
+    },
+    {
+      id: "pose-main",
+      kind: "pose",
+      clock_id: "session",
+      start_ns: BASE_NS.toString(),
+      end_ns: (BASE_NS + 10_000_000_000n).toString(),
+      sample_count: 1_000,
+      schema_ref: "aeromaint://schemas/pose/1.0.0",
+      artifact_ids: [],
+      calibration_ids: [],
+      gaps: []
     }
   ],
   provenance: {
@@ -93,6 +128,39 @@ export function createSyntheticViewerDataSource(): ViewerDataSource {
         }
       }
     ],
-    loadVectorSamples: () => Promise.resolve([])
+    loadVectorSamples: (_sessionId, streamId, startNs, endNs, signal) => {
+      if (signal?.aborted)
+        return Promise.reject(new DOMException("Aborted", "AbortError"));
+      const count = 64;
+      const duration = endNs - startNs;
+      const samples = Array.from({ length: count }, (_, index) => {
+        const ratio = index / (count - 1);
+        const phase = ratio * Math.PI * 4;
+        return {
+          timeNs:
+            startNs + BigInt(Math.round(Number(duration) * Math.min(1, ratio))),
+          x: Math.sin(phase) * (streamId === "imu-main" ? 9.81 : 2),
+          y: Math.cos(phase * 0.7) * (streamId === "imu-main" ? 4 : 1),
+          z: Math.sin(phase * 0.3) * (streamId === "imu-main" ? 2 : 0.5)
+        };
+      });
+      const fixtureRequests = (window.__AEROMAINT_FIXTURE_REQUESTS__ ??= {
+        started: 0,
+        aborted: 0
+      });
+      fixtureRequests.started += 1;
+      return new Promise((resolve, reject) => {
+        const onAbort = () => {
+          window.clearTimeout(timer);
+          fixtureRequests.aborted += 1;
+          reject(new DOMException("Aborted", "AbortError"));
+        };
+        const timer = window.setTimeout(() => {
+          signal?.removeEventListener("abort", onAbort);
+          resolve(samples);
+        }, 25);
+        signal?.addEventListener("abort", onAbort, { once: true });
+      });
+    }
   };
 }

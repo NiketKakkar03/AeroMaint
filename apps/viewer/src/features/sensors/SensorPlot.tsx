@@ -23,6 +23,7 @@ export interface SensorPlotProps {
   readonly startNs: bigint;
   readonly endNs: bigint;
   readonly selectedTimeNs: bigint;
+  readonly dataState?: "raw" | "downsampled" | "interpolated" | "model";
   readonly onSelectTime: (timeNs: bigint) => void;
 }
 
@@ -34,6 +35,7 @@ export function SensorPlot({
   startNs,
   endNs,
   selectedTimeNs,
+  dataState = "raw",
   onSelectTime
 }: SensorPlotProps) {
   const headingId = `${title.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-")}-heading`;
@@ -97,6 +99,7 @@ export function SensorPlot({
         <div>
           <h2 id={headingId}>{title}</h2>
           <span className="sensor-unit">Unit: {unit}</span>
+          <span className="sensor-unit">Data: {dataState}</span>
         </div>
         <ul className="sensor-legend" aria-label={`${title} axis legend`}>
           {AXES.map((axis) => (
