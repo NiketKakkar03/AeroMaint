@@ -17,7 +17,7 @@ The architecture starts as a modular monolith. The viewer, SDKs, ML services, an
 
 ## Prerequisites
 
-- Node.js 22.12+
+- Node.js 22.13+
 - pnpm 11+
 - Python 3.11 and uv
 - Docker Desktop or another Compose-compatible local runtime
