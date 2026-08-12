@@ -1,11 +1,36 @@
 {
-  "schemaVersion": "1.0.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schemaVersion": "1.1.0",
+  "protocolVersion": "2025-03-26",
   "tools": [
+    "sessions.list",
     "sessions.get",
+    "streams.list",
+    "model_tracks.get",
     "predictions.get",
     "documents.search",
+    "seek_events.lookup",
+    "annotations.list",
     "annotations.create_draft",
+    "exports.get",
     "exports.create"
   ],
-  "prohibitedTools": ["recommendations.approve"]
+  "resourceTemplates": [
+    "aeromaint://sessions/{session_id}",
+    "aeromaint://sessions/{session_id}/streams",
+    "aeromaint://sessions/{session_id}/model-track",
+    "aeromaint://sessions/{session_id}/annotations",
+    "aeromaint://exports/{export_id}"
+  ],
+  "prohibitedTools": [
+    "recommendations.approve",
+    "annotations.review",
+    "exports.cancel"
+  ],
+  "limits": {
+    "defaultTimeoutSeconds": 5,
+    "defaultOutputBytes": 64000,
+    "maxPageSize": 100,
+    "maxSearchResults": 10
+  }
 }
