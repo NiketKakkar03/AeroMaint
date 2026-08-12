@@ -8,14 +8,18 @@ token=$(PYTHONPATH=apps/data-api/src uv run python -c \
   'from aeromaint_api.security.auth import create_development_token; print(create_development_token(["viewer"], expires_in_seconds=900))')
 export VITE_API_TOKEN="$token"
 export AEROMAINT_EMPTY_STATE=true
-# Ask Docker to allocate ephemeral host ports so this isolated smoke project can
-# run alongside an existing local demo or other developer services.
+# Give each smoke run its own Compose project and named-volume namespace so it
+# cannot reuse demo data or collide with another local/CI run.
+smoke_id="aeromaint-release-smoke-$$"
+export AEROMAINT_VOLUME_PREFIX="$smoke_id"
+# Ask Docker to allocate ephemeral host ports so the smoke project can run
+# alongside an existing local demo or other developer services.
 export POSTGRES_PORT=0
 export API_PORT=0
 export VIEWER_PORT=0
 
 compose() {
-  docker compose --project-name aeromaint-release-smoke "$@"
+  docker compose --project-name "$smoke_id" "$@"
 }
 
 cleanup() {
