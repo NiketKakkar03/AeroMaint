@@ -5,6 +5,7 @@ import type {
   ExportJob
 } from "@aeromaint/capture-sdk";
 import type { ViewerDataSource } from "./sdk.js";
+import type { CopilotRun } from "../features/copilot/types.js";
 
 const BASE_NS = 9_007_199_254_740_993n;
 declare global {
@@ -121,6 +122,7 @@ export function createSyntheticViewerDataSource(
   sensorSampleCount = 64
 ): ViewerDataSource {
   let annotations: Annotation[] = [];
+  let copilotRuns: CopilotRun[] = [];
   let fixtureExport: ExportJob | undefined;
   const save = (draft: AnnotationDraft, current?: Annotation) => {
     const now = new Date().toISOString();
@@ -145,6 +147,54 @@ export function createSyntheticViewerDataSource(
     return item;
   };
   return {
+    askCopilot: (sessionId, question) => {
+      const run: CopilotRun = {
+        id: crypto.randomUUID(),
+        session_id: sessionId,
+        question,
+        status: "draft",
+        version: 1,
+        refusal_reason: null,
+        recommendation: {
+          summary: "Draft only: authorized engineer inspection required.",
+          claims: [
+            {
+              text: "The deterministic public health tool reports 142 cycles remaining useful life.",
+              citations: [
+                {
+                  evidence_id: "fixture-health",
+                  source_url: "/v1/health/sessions/browser-stereo/model-track",
+                  title: "Deterministic model health track",
+                  locator: "prediction-fixture-v1"
+                }
+              ]
+            }
+          ],
+          limitations: ["Approval requires an authorized engineer."]
+        }
+      };
+      copilotRuns = [run, ...copilotRuns];
+      return Promise.resolve(run);
+    },
+    listCopilotRuns: () => Promise.resolve(copilotRuns),
+    reviewCopilotRun: (id, action, version, revisedSummary) => {
+      const current = copilotRuns.find((item) => item.id === id);
+      if (current?.version !== version)
+        return Promise.reject(new Error("Recommendation changed"));
+      const updated = {
+        ...current,
+        status: action,
+        version: version + 1,
+        recommendation:
+          action === "revised" && current.recommendation && revisedSummary
+            ? { ...current.recommendation, summary: revisedSummary }
+            : current.recommendation
+      };
+      copilotRuns = copilotRuns.map((item) =>
+        item.id === id ? updated : item
+      );
+      return Promise.resolve(updated);
+    },
     listSessions: () =>
       Promise.resolve([
         { id: manifest.sessionId, manifest, processingStatus: "ready" as const }

@@ -18,6 +18,10 @@ import type {
   ArrowWorkerResponse
 } from "../workers/arrow.worker.js";
 import { parseArrowVectorStream } from "../workers/arrow-ipc.js";
+import type {
+  CopilotDataSource,
+  CopilotRun
+} from "../features/copilot/types.js";
 
 const defaultFetch: typeof globalThis.fetch = (input, init) =>
   globalThis.fetch(input, init);
@@ -110,7 +114,7 @@ export interface MediaSource {
   readonly synthetic?: { readonly label: string; readonly hue: number };
 }
 
-export interface ViewerDataSource {
+export interface ViewerDataSource extends CopilotDataSource {
   listSessions(signal?: AbortSignal): Promise<readonly SessionSummary[]>;
   getSessionManifest(
     sessionId: string,
@@ -200,6 +204,56 @@ export function createViewerDataSource(
       ? undefined
       : { Authorization: `Bearer ${token}` };
   return {
+    async askCopilot(sessionId, question) {
+      const response = await fetchImplementation(
+        `${normalizedBase}/v1/copilot/runs`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(authorizationHeaders ?? {})
+          },
+          body: JSON.stringify({ session_id: sessionId, question })
+        }
+      );
+      if (!response.ok)
+        throw new Error(`Copilot request failed (${String(response.status)})`);
+      return (await response.json()) as CopilotRun;
+    },
+    async listCopilotRuns(sessionId) {
+      const response = await fetchImplementation(
+        `${normalizedBase}/v1/copilot/runs?session_id=${encodeURIComponent(sessionId)}`,
+        authorizationHeaders === undefined
+          ? undefined
+          : { headers: authorizationHeaders }
+      );
+      if (!response.ok)
+        throw new Error(`Copilot queue failed (${String(response.status)})`);
+      return ((await response.json()) as { items: readonly CopilotRun[] })
+        .items;
+    },
+    async reviewCopilotRun(id, action, version, revisedSummary) {
+      const response = await fetchImplementation(
+        `${normalizedBase}/v1/copilot/runs/${encodeURIComponent(id)}/review`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(authorizationHeaders ?? {})
+          },
+          body: JSON.stringify({
+            action,
+            expected_version: version,
+            ...(revisedSummary === undefined
+              ? {}
+              : { revised_summary: revisedSummary })
+          })
+        }
+      );
+      if (!response.ok)
+        throw new Error(`Copilot review failed (${String(response.status)})`);
+      return (await response.json()) as CopilotRun;
+    },
     async listSessions(signal) {
       const response = await fetchImplementation(
         `${normalizedBase}/v1/sessions`,

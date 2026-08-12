@@ -20,6 +20,7 @@ import { SensorPlot } from "./features/sensors/SensorPlot.js";
 import { AnnotationTrack } from "./features/annotations/index.js";
 import { ExportPanel } from "./features/exports/index.js";
 import { HealthTrack } from "./features/health/index.js";
+import { CopilotPanel } from "./features/copilot/index.js";
 import type { VectorSample } from "./features/sensors/sensorMath.js";
 import { sensorWindow } from "./features/sensors/sensorWindow.js";
 import {
@@ -309,6 +310,7 @@ function SessionViewer({
           dataSource.getModelTrack(sessionId, signal)
         }
       />
+      <CopilotPanel sessionId={manifest.sessionId} dataSource={dataSource} />
       <AnnotationTrack
         sessionId={manifest.sessionId}
         startNs={visibleWindow.visibleStartNs}

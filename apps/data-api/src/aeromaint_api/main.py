@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from aeromaint_api.api.v1 import router as v1_router
+from aeromaint_api.api.v1.copilot import create_workflow
 from aeromaint_api.config import get_settings
 from aeromaint_api.db import Database, MigrationRunner
 from aeromaint_api.errors import ApiProblem
@@ -74,6 +75,7 @@ def create_app(
     application.state.session_repository = repository or InMemorySessionRepository()
     application.state.annotation_repository = InMemoryAnnotationRepository()
     application.state.export_repository = InMemoryExportRepository()
+    application.state.copilot_workflow = create_workflow()
     application.state.authenticator = authenticator
     application.state.audit_sink = audit_sink or InMemoryAppendOnlyAuditSink()
     application.state.rate_limiter = rate_limiter or InMemoryRateLimiter(
