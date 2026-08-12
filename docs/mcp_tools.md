@@ -24,14 +24,14 @@ or the server creates one.
 
 ## Tools and resources
 
-| Capability | Tools | Resource template |
-| --- | --- | --- |
-| Sessions | `sessions.list`, `sessions.get` | `aeromaint://sessions/{session_id}` |
-| Streams | `streams.list` | `aeromaint://sessions/{session_id}/streams` |
-| Model tracks | `model_tracks.get`, `predictions.get` | `aeromaint://sessions/{session_id}/model-track` |
-| Retrieval | `documents.search`, `seek_events.lookup` | — |
-| Annotations | `annotations.list`, `annotations.create_draft` | `aeromaint://sessions/{session_id}/annotations` |
-| Exports | `exports.get`, `exports.create` | `aeromaint://exports/{export_id}` |
+| Capability   | Tools                                          | Resource template                               |
+| ------------ | ---------------------------------------------- | ----------------------------------------------- |
+| Sessions     | `sessions.list`, `sessions.get`                | `aeromaint://sessions/{session_id}`             |
+| Streams      | `streams.list`                                 | `aeromaint://sessions/{session_id}/streams`     |
+| Model tracks | `model_tracks.get`, `predictions.get`          | `aeromaint://sessions/{session_id}/model-track` |
+| Retrieval    | `documents.search`, `seek_events.lookup`       | —                                               |
+| Annotations  | `annotations.list`, `annotations.create_draft` | `aeromaint://sessions/{session_id}/annotations` |
+| Exports      | `exports.get`, `exports.create`                | `aeromaint://exports/{export_id}`               |
 
 Inputs are Pydantic-generated JSON schemas with unknown fields prohibited. IDs are restricted to
 safe opaque identifiers, nanosecond values are bounded 64-bit non-negative integers, intervals must

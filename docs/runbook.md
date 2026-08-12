@@ -32,14 +32,14 @@ possibly exposed local secret by stopping the stack, deleting `.env.local-releas
 Profiles include their required PostgreSQL, migration, API, and viewer services. Limits below are
 Compose container ceilings; host overhead and build cache require additional disk.
 
-| Profile | Extra service | Suggested Docker RAM | Working disk | Command |
-|---|---|---:|---:|---|
-| `core` | none | 4 GB | 4 GB | `make up-core` |
-| `media` | bounded fixture media worker | 6 GB | 8 GB | `make up-media` |
-| `ml` | deterministic RUL service, no model download | 6 GB | 8 GB | `make up-ml` |
-| `ai` | retrieval/tool service, no LLM weights | 6 GB | 8 GB | `make up-ai` |
-| `observe` | Prometheus and Grafana | 6 GB | 10 GB | `make up-observe` |
-| `full` | all services | 10 GB | 16 GB | `make up-full` |
+| Profile   | Extra service                                | Suggested Docker RAM | Working disk | Command           |
+| --------- | -------------------------------------------- | -------------------: | -----------: | ----------------- |
+| `core`    | none                                         |                 4 GB |         4 GB | `make up-core`    |
+| `media`   | bounded fixture media worker                 |                 6 GB |         8 GB | `make up-media`   |
+| `ml`      | deterministic RUL service, no model download |                 6 GB |         8 GB | `make up-ml`      |
+| `ai`      | retrieval/tool service, no LLM weights       |                 6 GB |         8 GB | `make up-ai`      |
+| `observe` | Prometheus and Grafana                       |                 6 GB |        10 GB | `make up-observe` |
+| `full`    | all services                                 |                10 GB |        16 GB | `make up-full`    |
 
 Ports can be overridden with `API_PORT`, `VIEWER_PORT`, `MEDIA_PORT`, `ML_PORT`, `AI_PORT`,
 `PROMETHEUS_PORT`, and `GRAFANA_PORT`. PostgreSQL is intentionally network-internal. Run `make down`

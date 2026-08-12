@@ -36,7 +36,7 @@ services:
       retries: 20
     deploy:
       resources:
-        limits: {cpus: "1.0", memory: 1G}
+        limits: { cpus: "1.0", memory: 1G }
 
   migrate:
     build:
@@ -46,7 +46,7 @@ services:
     environment: *api-environment
     command: ["python", "-m", "aeromaint_api.db.migrations", "upgrade"]
     depends_on:
-      postgres: {condition: service_healthy}
+      postgres: { condition: service_healthy }
     restart: "no"
 
   api:
@@ -58,15 +58,21 @@ services:
     environment: *api-environment
     ports: ["${API_PORT:-8000}:8000"]
     depends_on:
-      migrate: {condition: service_completed_successfully}
+      migrate: { condition: service_completed_successfully }
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"]
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"
+        ]
       interval: 5s
       timeout: 5s
       retries: 20
     deploy:
       resources:
-        limits: {cpus: "1.0", memory: 768M}
+        limits: { cpus: "1.0", memory: 768M }
 
   viewer:
     <<: *service-defaults
@@ -81,10 +87,10 @@ services:
     ports:
       - "${VIEWER_PORT:-5173}:5173"
     depends_on:
-      api: {condition: service_healthy}
+      api: { condition: service_healthy }
     deploy:
       resources:
-        limits: {cpus: "1.5", memory: 1G}
+        limits: { cpus: "1.5", memory: 1G }
 
   media-worker:
     <<: *service-defaults
@@ -95,10 +101,10 @@ services:
     command: ["media-worker", "9011", "fixture-decoder/1"]
     ports: ["${MEDIA_PORT:-9011}:9011"]
     depends_on:
-      api: {condition: service_healthy}
+      api: { condition: service_healthy }
     deploy:
       resources:
-        limits: {cpus: "2.0", memory: 2G}
+        limits: { cpus: "2.0", memory: 2G }
 
   ml-service:
     <<: *service-defaults
@@ -109,10 +115,10 @@ services:
     command: ["ml-service", "9012", "deterministic-rul/1"]
     ports: ["${ML_PORT:-9012}:9012"]
     depends_on:
-      api: {condition: service_healthy}
+      api: { condition: service_healthy }
     deploy:
       resources:
-        limits: {cpus: "2.0", memory: 2G}
+        limits: { cpus: "2.0", memory: 2G }
 
   ai-service:
     <<: *service-defaults
@@ -123,25 +129,29 @@ services:
     command: ["ai-service", "9013", "retrieval-tools/1"]
     ports: ["${AI_PORT:-9013}:9013"]
     depends_on:
-      api: {condition: service_healthy}
+      api: { condition: service_healthy }
     deploy:
       resources:
-        limits: {cpus: "2.0", memory: 2G}
+        limits: { cpus: "2.0", memory: 2G }
 
   prometheus:
     <<: *service-defaults
     image: prom/prometheus:v3.5.0
     profiles: [observe, full]
-    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=7d"]
+    command:
+      [
+        "--config.file=/etc/prometheus/prometheus.yml",
+        "--storage.tsdb.retention.time=7d"
+      ]
     volumes:
       - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - aeromaint-prometheus:/prometheus
     ports: ["${PROMETHEUS_PORT:-9090}:9090"]
     depends_on:
-      api: {condition: service_healthy}
+      api: { condition: service_healthy }
     deploy:
       resources:
-        limits: {cpus: "1.0", memory: 1G}
+        limits: { cpus: "1.0", memory: 1G }
 
   grafana:
     <<: *service-defaults
@@ -160,7 +170,7 @@ services:
     depends_on: [prometheus]
     deploy:
       resources:
-        limits: {cpus: "0.5", memory: 512M}
+        limits: { cpus: "0.5", memory: 512M }
 
 volumes:
   aeromaint-postgres:

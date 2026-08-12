@@ -25,7 +25,7 @@ def test_copilot_draft_persists_and_engineer_approves() -> None:
     assert (
         client.post(
             f"/v1/copilot/runs/{run['id']}/review",
-        headers=headers("analyst", "analyst-review"),
+            headers=headers("analyst", "analyst-review"),
             json={"action": "approved", "expected_version": 1},
         ).status_code
         == 403
@@ -37,7 +37,5 @@ def test_copilot_draft_persists_and_engineer_approves() -> None:
     )
     assert approved.status_code == 200
     assert approved.json()["status"] == "approved"
-    listed = client.get(
-        "/v1/copilot/runs?session_id=demo", headers=headers("viewer", "list-runs")
-    )
+    listed = client.get("/v1/copilot/runs?session_id=demo", headers=headers("viewer", "list-runs"))
     assert listed.json()["items"][0]["status"] == "approved"
