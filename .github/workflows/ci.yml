@@ -24,9 +24,9 @@ jobs:
         with:
           version: "0.11.26"
           enable-cache: true
-      - uses: aquasecurity/setup-trivy@v0.2.4
+      - uses: aquasecurity/setup-trivy@3fb12ecacb959635e4d6e213dc54a81c0c85d71a
         with:
-          version: v0.65.0
+          version: v0.70.0
       - run: pnpm install --frozen-lockfile
       - run: uv sync --frozen --python 3.11
       - run: uv tool install pip-audit
