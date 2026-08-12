@@ -7,6 +7,7 @@ RUN uv sync --frozen --no-dev
 COPY apps/data-api ./apps/data-api
 COPY apps/worker ./apps/worker
 COPY packages ./packages
+COPY services ./services
 
 ENV PATH="/workspace/.venv/bin:$PATH"
 ENV PYTHONPATH="/workspace:/workspace/apps/data-api/src:/workspace/apps/worker/src"
