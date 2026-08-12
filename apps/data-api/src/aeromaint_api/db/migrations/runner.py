@@ -24,7 +24,12 @@ class MigrationRunner:
                 up=root.joinpath(f"{version:04d}_{name}.up.sql").read_text(),
                 down=root.joinpath(f"{version:04d}_{name}.down.sql").read_text(),
             )
-            for version, name in ((1, "initial"), (2, "versioned_annotations"))
+            for version, name in (
+                (1, "initial"),
+                (2, "versioned_annotations"),
+                (3, "exports"),
+                (4, "retrieval"),
+            )
         ]
 
     async def upgrade(self) -> None:

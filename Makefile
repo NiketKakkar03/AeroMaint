@@ -1,4 +1,4 @@
-.PHONY: bootstrap dev check test euroc-download euroc-verify euroc-fixture-check cmapss-acquire cmapss-prepare cmapss-train rag-index up-core down
+.PHONY: bootstrap dev check test euroc-download euroc-verify euroc-fixture-check cmapss-acquire cmapss-prepare cmapss-train rag-acquire rag-index rag-evaluate up-core down
 
 bootstrap:
 	pnpm install
@@ -55,6 +55,13 @@ cmapss-train:
 rag-index:
 	@test -n "$(RAG_MANIFEST)" || (echo "RAG_MANIFEST is required" >&2; exit 2)
 	uv run python -c 'from pathlib import Path; from pipelines.documents.index import build_from_manifest; build_from_manifest(Path("$(RAG_MANIFEST)"), Path("$(or $(RAG_INDEX),artifacts/retrieval/index.json)"))'
+
+rag-acquire:
+	@test -n "$(RAG_MANIFEST)" || (echo "RAG_MANIFEST is required" >&2; exit 2)
+	uv run python -c 'from pathlib import Path; from pipelines.documents.index import acquire_from_manifest; acquire_from_manifest(Path("$(RAG_MANIFEST)"))'
+
+rag-evaluate:
+	uv run python evals/rag/evaluate.py --index "$(or $(RAG_INDEX),artifacts/retrieval/index.json)"
 
 up-core:
 	docker compose --profile core up --build

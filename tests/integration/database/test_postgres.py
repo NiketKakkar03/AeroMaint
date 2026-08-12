@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 import pytest_asyncio
+from packages.retrieval import Document, PostgresHybridIndex, build_index
 from psycopg.errors import ObjectNotInPrerequisiteState
 
 from aeromaint_api.db import Database, MigrationRunner
@@ -77,3 +78,31 @@ async def test_audit_events_are_append_only(database: Database) -> None:
         async with database.connection() as connection, connection.transaction():
             await connection.execute("DELETE FROM audit_events WHERE id=%s", (event.id,))
     assert [item.id for item in await repository.list_for_entity("session", "s1")] == [event.id]
+
+
+@pytest.mark.asyncio
+async def test_retrieval_reindex_is_idempotent_and_search_indexes_exist(database: Database) -> None:
+    index = build_index(
+        [
+            Document(
+                "https://ntrs.nasa.gov/example",
+                "NASA example",
+                "v1",
+                "# Bearings\nBearing vibration evidence.",
+            )
+        ]
+    )
+    repository = PostgresHybridIndex(database)
+    assert await repository.reindex(index) is True
+    assert await repository.reindex(index) is False
+    async with database.connection() as connection:
+        cursor = await connection.execute(
+            "SELECT count(*) AS count FROM retrieval_chunks WHERE index_version=%s",
+            (index.version,),
+        )
+        assert (await cursor.fetchone())["count"] == len(index.chunks)
+        cursor = await connection.execute(
+            "SELECT indexname FROM pg_indexes WHERE tablename='retrieval_chunks'"
+        )
+        names = {row["indexname"] for row in await cursor.fetchall()}
+    assert {"retrieval_chunks_fts_idx", "retrieval_chunks_vector_idx"} <= names

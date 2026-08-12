@@ -1,4 +1,22 @@
 [
-  {"query": "turbofan degradation prognostics", "expected_title": "NASA C-MAPSS turbofan degradation simulation"},
-  {"query": "authorized maintenance approval", "expected_title": "FAA AC 43.13-1B"}
+  {
+    "query": "turbofan degradation prognostics",
+    "expected_title": "NASA C-MAPSS turbofan degradation simulation"
+  },
+  {
+    "query": "authorized maintenance approval",
+    "expected_title": "FAA AC 43.13-1B"
+  },
+  {
+    "query": "forecast residual engine life after degradation",
+    "expected_title": "NASA C-MAPSS turbofan degradation simulation"
+  },
+  {
+    "query": "authorization for return to service",
+    "expected_title": "FAA AC 43.13-1B"
+  },
+  {
+    "query": "xylophone nebula quasar",
+    "expected_status": "insufficient_evidence"
+  }
 ]

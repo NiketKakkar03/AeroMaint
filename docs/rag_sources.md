@@ -1,16 +1,44 @@
-# Retrieval sources and safety boundary
+# Retrieval sources, licensing, and evaluation
 
-AeroMaint indexes only explicitly approved, locally supplied documents. Each source manifest records
-an HTTPS canonical URL, title, edition/version, optional page, local path, and `approved: true`.
-Ingestion refuses unapproved entries and paths outside the manifest directory. Rebuilding the same
-corpus produces the same index version and does not rewrite an identical index.
+AeroMaint only indexes operator-supplied documents explicitly approved in a versioned JSON manifest.
+The repository does not redistribute NASA or FAA publications. This preserves publisher terms and
+keeps the runtime local and zero-cost. An approver must confirm the document's reuse terms; metadata
+is an audit record, not legal advice.
 
-The built-in API fixture contains short descriptive excerpts linked to NASA NTRS and FAA AC 43.13-1B.
-It exists for deterministic contract tests and is not a substitute for the complete publications.
-Full documents are deliberately not redistributed here; an operator must review licensing, download
-from the canonical publisher, verify checksums, and approve the manifest.
+Each source entry requires `approved: true`, `approved_by`, `license`, canonical HTTPS `url`, `title`,
+publication `version`, relative `path`, and lowercase `sha256`. A minimal entry is:
 
-Search combines exact token frequency with a deterministic local feature-hash embedding via reciprocal
-rank fusion. Every result retains URL, title, version, page, section, and stable chunk ID. Queries with
-no positive lexical or semantic evidence return `insufficient_evidence`. This retrieval output is
-evidence for review, never authority for an airworthiness or return-to-service decision.
+```json
+{
+  "approved": true,
+  "approved_by": "engineering-library-review",
+  "license": "reviewed publisher terms",
+  "url": "https://ntrs.nasa.gov/citations/20090029214",
+  "title": "NASA C-MAPSS turbofan degradation simulation",
+  "version": "2008",
+  "path": "artifacts/nasa-cmapss.pdf",
+  "sha256": "<64 lowercase hexadecimal characters>"
+}
+```
+
+`make rag-acquire RAG_MANIFEST=...` downloads only missing files, verifies bytes before an atomic
+rename, and re-verifies existing files. `make rag-index` parses text or PDF pages, rejects malformed,
+encrypted, empty, NUL-containing, missing, and checksum-mismatched inputs, then publishes an index
+atomically. Identical input produces the same index version and leaves the existing file untouched.
+
+Every chunk records source URL/title/version/checksum, one-based PDF page (or a manifest override),
+section, and exact `start_char`/`end_char` offsets. Search returns those fields with the matching text,
+so callers can verify the span. Unsupported input returns `insufficient_evidence`; retrieved passages
+remain review evidence, never authority for airworthiness or return-to-service decisions.
+
+The default local profile uses deterministic 96-dimensional word/character feature hashing and no
+paid service or model download. The PostgreSQL profile migration enables pgvector, a generated English
+`tsvector` with GIN, a cosine HNSW index, and reciprocal-rank fusion. Reindexing inserts an immutable
+corpus version once and changes the active version transactionally.
+
+## Evaluation gate
+
+Run `make rag-evaluate RAG_INDEX=...`. The checked-in curated set covers exact NASA/FAA terminology,
+semantic paraphrases, and abstention. The release target is at least **80% top-5 relevance**, with all
+exact terminology cases and unsupported-query abstention passing. The deterministic five-query fixture
+currently reaches **100% (5/5)**; this is a contract result, not a claim about an unreviewed full corpus.
