@@ -1,5 +1,9 @@
 # Local release runbook
 
+> Local educational prototype only. Do not load controlled, personal, export-controlled, or
+> operational aircraft data without an approved handling plan. AeroMaint has no authority to approve
+> maintenance or return equipment to service.
+
 This runbook operates AeroMaint on Docker Desktop for supported Apple Silicon and Intel Macs.
 All commands run from the repository root. Docker Desktop 4.40+, Compose v2, `curl`, `openssl`,
 Python 3.11, `uv`, Node 22, and pnpm 11 are expected for the complete validation suite.
@@ -102,3 +106,30 @@ trace ID. Check `migrate` logs before restarting the API. Do not reset volumes a
 5. Run `make check` for source tests and static analysis.
 6. Save command output and `docker compose images`; run `make down`.
 7. Only when the backup has been verified, run `make reset TARGET=local CONFIRM=RESET`.
+
+## Portfolio reviewer path
+
+Run `make portfolio-demo` for the deterministic, non-mutating two-to-three-minute viewer/SDK
+storyboard. The full local stack remains `make demo`. Review retained claims and explicit gaps in
+`evals/reports/README.md`, then run:
+
+```sh
+make release-check
+make check
+pnpm test:sdk-pack
+pnpm test:sdk-python-pack
+pnpm test:sdk-react-pack
+```
+
+The retained 20-minute browser benchmark is intentionally not rerun by the short demo. It applies
+only to the environment and fixture recorded in its JSON report.
+
+## Source release archive
+
+From a clean committed tree, run `make release-check && make release-archive`, then verify the
+generated checksum from inside `dist/release/` with `shasum -a 256 -c *.sha256`. The archive command
+uses `git archive HEAD`, embeds the source commit in its name and prefix, and rejects uncommitted
+changes.
+
+For failures, preserve inputs, outputs, versions, logs, and trace IDs. Label any result unverified and
+escalate to a qualified human before it could influence a real maintenance decision.

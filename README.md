@@ -4,6 +4,18 @@ AeroMaint Studio is a local-first multimodal aerospace data platform for synchro
 
 > Educational decision-support prototype only. It is not approved for aircraft maintenance or vehicle control.
 
+## Portfolio release
+
+Start with the [two-to-three-minute viewer/SDK demo](docs/demo/README.md), then use the
+[release evidence index](evals/reports/README.md) to distinguish measured results from unrun or
+fixture-only gates. Safety boundaries are summarized in [limitations](docs/limitations.md), the
+[threat model](docs/threat_model.md), and the [model card](docs/model_card.md).
+
+```bash
+make portfolio-demo # prints the viewer/API-first portfolio walkthrough
+make release-check # checks local links, evidence references, and release metadata
+```
+
 ## Initial stack
 
 - **Web:** React 19, TypeScript (strict), Vite, TanStack Query
@@ -71,7 +83,8 @@ docs/adr             Architectural decision records
 infrastructure       Local deployment configuration
 ```
 
-The full product and system design remains in [`AeroMaint_AI_Project_Documentation.md`](./AeroMaint_AI_Project_Documentation.md).
+The current system map is in [docs/architecture.md](docs/architecture.md). Historical private design
+notes are intentionally not required by the reviewer path.
 
 ## Phase 0 fixture vertical slice
 

@@ -3,7 +3,7 @@
 - Status: Accepted
 - Date: 2026-08-03
 
-Related specification: [project documentation](../../AeroMaint_AI_Project_Documentation.md), sections
+Related specification: [current architecture](../architecture.md), sections
 16, 17, and 21.
 
 ## Context

@@ -1,0 +1,70 @@
+{
+  "schema": "aeromaint.release-evidence/v1",
+  "generated_for": "portfolio-candidate",
+  "entries": [
+    {
+      "id": "viewer-20min",
+      "area": "media/viewer latency and browser resources",
+      "status": "measured",
+      "scope": "20-minute synthetic stereo fixture in the environment embedded in the report",
+      "report": "tests/browser-performance/reports/viewer-20min.json",
+      "command": "pnpm --filter @aeromaint/viewer test:benchmark"
+    },
+    {
+      "id": "sensor-rendering",
+      "area": "viewer sensor rendering",
+      "status": "measured",
+      "scope": "two 100,000-sample synthetic tracks in the browser environment embedded in the report",
+      "report": "tests/browser-performance/reports/sensor-rendering.json",
+      "command": "pnpm --filter @aeromaint/viewer test:browser -- sensor-performance.spec.ts"
+    },
+    {
+      "id": "rag-smoke",
+      "area": "retrieval quality",
+      "status": "fixture_only",
+      "scope": "two deterministic smoke queries; not broad NASA/FAA corpus quality",
+      "report": "evals/rag/report.md",
+      "command": "uv run pytest tests/contract/retrieval/test_hybrid.py"
+    },
+    {
+      "id": "release-checks",
+      "area": "documentation, source, SDK and release quality",
+      "status": "measured",
+      "scope": "commands and environment recorded in the clean-checkout rehearsal",
+      "report": "evals/reports/clean-checkout.md",
+      "command": "make release-check"
+    },
+    {
+      "id": "rul-fd001",
+      "area": "model quality",
+      "status": "not_run",
+      "scope": "no approved FD001 source/model artifact is committed",
+      "report": null,
+      "command": "make cmapss-prepare && make cmapss-train"
+    },
+    {
+      "id": "api-load",
+      "area": "API latency/throughput/resource use",
+      "status": "not_run",
+      "scope": "no retained load-test environment or report",
+      "report": null,
+      "command": null
+    },
+    {
+      "id": "agent-quality",
+      "area": "agent task quality and safety",
+      "status": "not_run",
+      "scope": "bounded MCP contract tests are not an agent-quality evaluation",
+      "report": null,
+      "command": null
+    },
+    {
+      "id": "export-e2e-latency",
+      "area": "aligned export latency/resources",
+      "status": "not_run",
+      "scope": "functional tests exist; no retained performance report",
+      "report": null,
+      "command": null
+    }
+  ]
+}

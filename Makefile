@@ -1,4 +1,4 @@
-.PHONY: bootstrap demo local-ci ci ci-portable sdk-pack browser-compatibility release-artifacts security-scan compose-smoke seed backup restore reset smoke smoke-matrix backup-restore-drill failure-injection dev check test euroc-download euroc-verify euroc-fixture-check cmapss-acquire cmapss-prepare cmapss-train rag-acquire rag-index rag-evaluate up-core up-media up-ml up-ai up-observe up-full down
+.PHONY: bootstrap demo portfolio-demo local-ci ci ci-portable sdk-pack browser-compatibility release-artifacts release-check release-archive security-scan compose-smoke seed backup restore reset smoke smoke-matrix backup-restore-drill failure-injection dev check test euroc-download euroc-verify euroc-fixture-check cmapss-acquire cmapss-prepare cmapss-train rag-acquire rag-index rag-evaluate up-core up-media up-ml up-ai up-observe up-full down
 
 bootstrap:
 	./scripts/local-release bootstrap
@@ -67,25 +67,14 @@ ci-portable: check sdk-pack release-artifacts
 
 ci: ci-portable browser-compatibility security-scan compose-smoke
 
-sdk-pack:
-	pnpm test:sdk-pack
-	pnpm test:sdk-python-pack
+portfolio-demo:
+	./scripts/demo.sh
 
-browser-compatibility:
-	pnpm --filter @aeromaint/viewer exec playwright test --project=chromium --project=firefox
+release-check:
+	uv run python scripts/release.py audit
 
-release-artifacts:
-	uv run python scripts/build_release.py
-
-security-scan:
-	sh infrastructure/local-release/security-scan.sh
-
-compose-smoke:
-	sh infrastructure/local-release/compose-smoke.sh
-
-ci-portable: check sdk-pack release-artifacts
-
-ci: ci-portable browser-compatibility security-scan compose-smoke
+release-archive:
+	uv run python scripts/release.py archive
 
 EUROC_SEQUENCE ?= V1_01_easy
 EUROC_DEST ?= data/euroc
