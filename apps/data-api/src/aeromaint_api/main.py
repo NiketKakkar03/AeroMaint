@@ -1,8 +1,10 @@
+import time
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from typing import Literal
 from uuid import uuid4
 
+import structlog
 from fastapi import FastAPI, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -30,6 +32,14 @@ from aeromaint_api.security.middleware import IdempotencyMiddleware, SecurityHea
 from aeromaint_api.security.problems import problem_response as security_problem_response
 from aeromaint_api.security.rate_limit import InMemoryRateLimiter, RateLimiter
 from aeromaint_api.services.playback import InMemorySessionRepository, SessionRepository
+
+logger = structlog.get_logger("aeromaint_api")
+structlog.configure(
+    processors=[
+        structlog.processors.TimeStamper(fmt="iso", utc=True),
+        structlog.processors.JSONRenderer(),
+    ]
+)
 
 
 class HealthResponse(BaseModel):
@@ -92,9 +102,25 @@ def create_app(
     ) -> Response:
         request.state.request_id = request.headers.get("x-request-id") or str(uuid4())
         request.state.trace_id = request.headers.get("x-trace-id") or request.state.request_id
+        started = time.perf_counter()
         response = await call_next(request)
+        duration = time.perf_counter() - started
         response.headers["X-Request-ID"] = request.state.request_id
         response.headers["X-Trace-ID"] = request.state.trace_id
+        logger.info(
+            "http_request",
+            service="data-api",
+            method=request.method,
+            path=request.url.path,
+            status_code=response.status_code,
+            duration_ms=round(duration * 1000, 3),
+            request_id=request.state.request_id,
+            trace_id=request.state.trace_id,
+        )
+        application.state.request_count = getattr(application.state, "request_count", 0) + 1
+        application.state.request_duration = (
+            getattr(application.state, "request_duration", 0.0) + duration
+        )
         return response
 
     @application.exception_handler(ApiProblem)
@@ -133,7 +159,25 @@ def create_app(
 
     @application.get("/health/ready", response_model=HealthResponse, tags=["health"])
     async def ready() -> HealthResponse:
+        database = getattr(application.state, "database", None)
+        if database is not None:
+            await database.check()
         return HealthResponse(environment=settings.env)
+
+    @application.get("/metrics", include_in_schema=False)
+    async def metrics() -> Response:
+        count = getattr(application.state, "request_count", 0)
+        duration = getattr(application.state, "request_duration", 0.0)
+        body = (
+            "# HELP aeromaint_http_requests_total HTTP requests handled.\n"
+            "# TYPE aeromaint_http_requests_total counter\n"
+            f'aeromaint_http_requests_total{{service="data-api"}} {count}\n'
+            "# HELP aeromaint_http_request_duration_seconds_sum Request latency sum.\n"
+            "# TYPE aeromaint_http_request_duration_seconds_sum counter\n"
+            f'aeromaint_http_request_duration_seconds_sum{{service="data-api"}} {duration:.6f}\n'
+            'aeromaint_build_info{service="data-api",version="0.1.0"} 1\n'
+        )
+        return Response(body, media_type="text/plain; version=0.0.4")
 
     application.include_router(v1_router)
     return application

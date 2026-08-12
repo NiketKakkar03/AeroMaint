@@ -1,8 +1,37 @@
-.PHONY: bootstrap dev check test euroc-download euroc-verify euroc-fixture-check cmapss-acquire cmapss-prepare cmapss-train rag-acquire rag-index rag-evaluate up-core down
+.PHONY: bootstrap demo ci seed backup restore reset smoke smoke-matrix backup-restore-drill failure-injection dev check test euroc-download euroc-verify euroc-fixture-check cmapss-acquire cmapss-prepare cmapss-train rag-acquire rag-index rag-evaluate up-core up-media up-ml up-ai up-observe up-full down
 
 bootstrap:
-	pnpm install
-	uv sync --python 3.11
+	./scripts/local-release bootstrap
+
+demo:
+	./scripts/local-release demo
+
+ci:
+	./scripts/local-release ci
+
+seed:
+	./scripts/local-release seed
+
+backup:
+	./scripts/local-release backup --target "$(TARGET)" $(if $(OUTPUT),--output "$(OUTPUT)")
+
+restore:
+	./scripts/local-release restore --target "$(TARGET)" --input "$(INPUT)"
+
+reset:
+	./scripts/local-release reset --target "$(TARGET)" --confirm "$(CONFIRM)"
+
+smoke:
+	./scripts/local-release smoke $(if $(PROFILE),--profile "$(PROFILE)")
+
+smoke-matrix:
+	./scripts/profile-smoke-matrix.sh
+
+backup-restore-drill:
+	./scripts/backup-restore-drill.sh
+
+failure-injection:
+	./scripts/failure-injection.sh
 
 dev:
 	pnpm dev
@@ -64,7 +93,22 @@ rag-evaluate:
 	uv run python evals/rag/evaluate.py --index "$(or $(RAG_INDEX),artifacts/retrieval/index.json)"
 
 up-core:
-	docker compose --profile core up --build
+	./scripts/local-release up --profile core
+
+up-media:
+	./scripts/local-release up --profile media
+
+up-ml:
+	./scripts/local-release up --profile ml
+
+up-ai:
+	./scripts/local-release up --profile ai
+
+up-observe:
+	./scripts/local-release up --profile observe
+
+up-full:
+	./scripts/local-release up --profile full
 
 down:
-	docker compose down --remove-orphans
+	./scripts/local-release down

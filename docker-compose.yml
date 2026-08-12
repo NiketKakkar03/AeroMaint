@@ -1,60 +1,165 @@
 name: aeromaint
 
+x-api-environment: &api-environment
+  AEROMAINT_ENV: development
+  AEROMAINT_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-aeromaint}:${POSTGRES_PASSWORD:-aeromaint-local-only}@postgres:5432/${POSTGRES_DB:-aeromaint}
+  AEROMAINT_JWT_SECRET: ${AEROMAINT_JWT_SECRET:-development-only-change-me}
+  AEROMAINT_LOG_FORMAT: json
+  PYTHONPATH: /workspace:/workspace/apps/data-api/src:/workspace/apps/worker/src
+
+x-service-defaults: &service-defaults
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
 services:
   postgres:
+    <<: *service-defaults
     image: pgvector/pgvector:pg16
-    profiles: [core]
+    profiles: [core, media, ml, ai, observe, full]
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-aeromaint}
       POSTGRES_USER: ${POSTGRES_USER:-aeromaint}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aeromaint-local-only}
-    ports:
-      - "5432:5432"
-    volumes:
-      - aeromaint-postgres:/var/lib/postgresql/data
+    expose: ["5432"]
+    volumes: [aeromaint-postgres:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 20
+    deploy:
+      resources:
+        limits: {cpus: "1.0", memory: 1G}
 
-  api:
+  migrate:
     build:
       context: .
       dockerfile: apps/data-api/Dockerfile
-    profiles: [core]
-    environment:
-      AEROMAINT_ENV: development
-      AEROMAINT_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-aeromaint}:${POSTGRES_PASSWORD:-aeromaint-local-only}@postgres:5432/${POSTGRES_DB:-aeromaint}
-    ports:
-      - "8000:8000"
+    profiles: [core, media, ml, ai, observe, full]
+    environment: *api-environment
+    command: ["python", "-m", "aeromaint_api.db.migrations", "upgrade"]
     depends_on:
-      postgres:
-        condition: service_healthy
+      postgres: {condition: service_healthy}
+    restart: "no"
+
+  api:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: apps/data-api/Dockerfile
+    profiles: [core, media, ml, ai, observe, full]
+    environment: *api-environment
+    ports: ["${API_PORT:-8000}:8000"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
     healthcheck:
-      test:
-        [
-          "CMD",
-          "python",
-          "-c",
-          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"
-        ]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 20
+    deploy:
+      resources:
+        limits: {cpus: "1.0", memory: 768M}
 
   viewer:
+    <<: *service-defaults
     build:
       context: .
       dockerfile: apps/viewer/Dockerfile
-    profiles: [core]
+    profiles: [core, media, ml, ai, observe, full]
     environment:
-      VITE_API_URL: http://localhost:8000
-    ports:
-      - "5173:5173"
+      VITE_API_BASE_URL: http://localhost:${API_PORT:-8000}
+    ports: ["${VIEWER_PORT:-5173}:5173"]
     depends_on:
-      api:
-        condition: service_healthy
+      api: {condition: service_healthy}
+    deploy:
+      resources:
+        limits: {cpus: "1.5", memory: 1G}
+
+  media-worker:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: infrastructure/local-release/Dockerfile
+    profiles: [media, full]
+    command: ["media-worker", "9011", "fixture-decoder/1"]
+    ports: ["${MEDIA_PORT:-9011}:9011"]
+    depends_on:
+      api: {condition: service_healthy}
+    deploy:
+      resources:
+        limits: {cpus: "2.0", memory: 2G}
+
+  ml-service:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: infrastructure/local-release/Dockerfile
+    profiles: [ml, full]
+    command: ["ml-service", "9012", "deterministic-rul/1"]
+    ports: ["${ML_PORT:-9012}:9012"]
+    depends_on:
+      api: {condition: service_healthy}
+    deploy:
+      resources:
+        limits: {cpus: "2.0", memory: 2G}
+
+  ai-service:
+    <<: *service-defaults
+    build:
+      context: .
+      dockerfile: infrastructure/local-release/Dockerfile
+    profiles: [ai, full]
+    command: ["ai-service", "9013", "retrieval-tools/1"]
+    ports: ["${AI_PORT:-9013}:9013"]
+    depends_on:
+      api: {condition: service_healthy}
+    deploy:
+      resources:
+        limits: {cpus: "2.0", memory: 2G}
+
+  prometheus:
+    <<: *service-defaults
+    image: prom/prometheus:v3.5.0
+    profiles: [observe, full]
+    command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=7d"]
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - aeromaint-prometheus:/prometheus
+    ports: ["${PROMETHEUS_PORT:-9090}:9090"]
+    depends_on:
+      api: {condition: service_healthy}
+    deploy:
+      resources:
+        limits: {cpus: "1.0", memory: 1G}
+
+  grafana:
+    <<: *service-defaults
+    image: grafana/grafana:12.1.0
+    profiles: [observe, full]
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-local-only-change-me}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infrastructure/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - aeromaint-grafana:/var/lib/grafana
+    ports: ["${GRAFANA_PORT:-3000}:3000"]
+    depends_on: [prometheus]
+    deploy:
+      resources:
+        limits: {cpus: "0.5", memory: 512M}
 
 volumes:
   aeromaint-postgres:
+    name: ${AEROMAINT_VOLUME_PREFIX:-aeromaint-local}-postgres
+  aeromaint-prometheus:
+    name: ${AEROMAINT_VOLUME_PREFIX:-aeromaint-local}-prometheus
+  aeromaint-grafana:
+    name: ${AEROMAINT_VOLUME_PREFIX:-aeromaint-local}-grafana

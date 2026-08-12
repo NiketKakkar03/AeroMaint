@@ -25,8 +25,20 @@ The architecture starts as a modular monolith. The viewer, SDKs, ML services, an
 ## Bootstrap
 
 ```bash
-cp .env.example .env
 make bootstrap
+make demo
+```
+
+This generates ignored local credentials, validates Compose, starts the minimal core profile, runs
+migrations, and seeds a tiny synthetic fixture. It does not download model weights or large media.
+See the [local release runbook](./docs/runbook.md) for profiles, resource budgets, observability,
+backup/restore, reset safeguards, and release drills.
+
+For host-based development, install dependencies and run checks explicitly:
+
+```bash
+pnpm install
+uv sync --python 3.11
 make check
 ```
 

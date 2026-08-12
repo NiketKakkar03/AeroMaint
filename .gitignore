@@ -17,6 +17,8 @@ __pycache__/
 
 .env
 .env.local
+.env.local-release
+backups/
 data/*
 !data/.gitkeep
 artifacts/

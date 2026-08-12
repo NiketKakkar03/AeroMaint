@@ -1,0 +1,47 @@
+{
+  "annotations": {"list": []},
+  "editable": false,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "short"}},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+      "id": 1,
+      "targets": [{"expr": "sum(aeromaint_http_requests_total)", "refId": "A"}],
+      "title": "API requests",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 0},
+      "id": 2,
+      "targets": [{"expr": "aeromaint_service_up", "legendFormat": "{{service}} {{version}}", "refId": "A"}],
+      "title": "Model and tool versions",
+      "type": "table"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "s"}},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 0},
+      "id": 3,
+      "targets": [{"expr": "rate(aeromaint_http_request_duration_seconds_sum[5m])", "refId": "A"}],
+      "title": "Request latency rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8},
+      "id": 4,
+      "targets": [{"expr": "up", "legendFormat": "{{job}} / {{instance}}", "refId": "A"}],
+      "title": "Readiness and scrape failures",
+      "type": "timeseries"
+    }
+  ],
+  "schemaVersion": 41,
+  "tags": ["aeromaint", "local-release"],
+  "templating": {"list": []},
+  "time": {"from": "now-1h", "to": "now"},
+  "title": "AeroMaint Platform Overview",
+  "uid": "aeromaint-platform",
+  "version": 1
+}

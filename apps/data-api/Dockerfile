@@ -5,6 +5,8 @@ WORKDIR /workspace
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
 COPY apps/data-api ./apps/data-api
+COPY apps/worker ./apps/worker
+COPY packages ./packages
 
 ENV PATH="/workspace/.venv/bin:$PATH"
 EXPOSE 8000

@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ENV_FILE="$ROOT/.env.local-release"
+COMPOSE=(docker compose --project-directory "$ROOT" --env-file "$ENV_FILE")
+
+die() { echo "local-release: $*" >&2; exit 2; }
+need() { command -v "$1" >/dev/null || die "$1 is required"; }
+require_local_target() {
+  [[ "${1:-}" == "local" ]] || die "destructive operation requires --target local"
+}
+write_env() {
+  if [[ ! -f "$ENV_FILE" ]]; then
+    umask 077
+    jwt="$(openssl rand -hex 32)"
+    grafana="$(openssl rand -hex 18)"
+    cat >"$ENV_FILE" <<EOF
+# Generated local credentials. Never commit this file.
+AEROMAINT_JWT_SECRET=$jwt
+GRAFANA_ADMIN_PASSWORD=$grafana
+AEROMAINT_VOLUME_PREFIX=aeromaint-local
+EOF
+    echo "Created $ENV_FILE with mode 0600"
+  fi
+}
+parse_target() {
+  TARGET=""
+  while (($#)); do
+    case "$1" in
+      --target) TARGET="${2:-}"; shift 2 ;;
+      *) die "unknown argument: $1" ;;
+    esac
+  done
+}
+
+cmd="${1:-help}"; shift || true
+case "$cmd" in
+  bootstrap)
+    need docker; need openssl; write_env
+    "${COMPOSE[@]}" --profile full config --quiet
+    echo "Local release configuration is valid."
+    ;;
+  up)
+    write_env; profile="core"
+    [[ "${1:-}" == "--profile" ]] && { profile="${2:-}"; shift 2; }
+    [[ "$profile" =~ ^(core|media|ml|ai|observe|full)$ ]] || die "invalid profile: $profile"
+    "${COMPOSE[@]}" --profile "$profile" up --build -d --wait
+    ;;
+  demo)
+    "$0" bootstrap
+    "$0" up --profile core
+    "$0" seed
+    echo "AeroMaint demo: http://localhost:${VIEWER_PORT:-5173} (API :${API_PORT:-8000})"
+    ;;
+  seed)
+    write_env
+    "${COMPOSE[@]}" --profile core exec -T postgres psql \
+      -v ON_ERROR_STOP=1 -U "${POSTGRES_USER:-aeromaint}" -d "${POSTGRES_DB:-aeromaint}" \
+      <"$ROOT/infrastructure/local-release/seed.sql"
+    ;;
+  backup)
+    write_env; TARGET=""; OUTPUT="$ROOT/backups/aeromaint-$(date -u +%Y%m%dT%H%M%SZ).dump"
+    while (($#)); do
+      case "$1" in
+        --target) TARGET="${2:-}"; shift 2 ;;
+        --output) OUTPUT="${2:-}"; shift 2 ;;
+        *) die "unknown argument: $1" ;;
+      esac
+    done
+    require_local_target "$TARGET"; mkdir -p "$(dirname "$OUTPUT")"
+    "${COMPOSE[@]}" --profile core exec -T postgres pg_dump \
+      -U "${POSTGRES_USER:-aeromaint}" -d "${POSTGRES_DB:-aeromaint}" -Fc >"$OUTPUT"
+    [[ -s "$OUTPUT" ]] || die "empty backup: $OUTPUT"
+    echo "Backup written to $OUTPUT"
+    ;;
+  restore)
+    write_env; TARGET=""; INPUT=""
+    while (($#)); do
+      case "$1" in
+        --target) TARGET="${2:-}"; shift 2 ;;
+        --input) INPUT="${2:-}"; shift 2 ;;
+        *) die "unknown argument: $1" ;;
+      esac
+    done
+    require_local_target "$TARGET"; [[ -f "$INPUT" ]] || die "backup does not exist: $INPUT"
+    "${COMPOSE[@]}" --profile core exec -T postgres pg_restore \
+      --clean --if-exists --no-owner -U "${POSTGRES_USER:-aeromaint}" \
+      -d "${POSTGRES_DB:-aeromaint}" <"$INPUT"
+    "$0" smoke --profile core
+    ;;
+  reset)
+    write_env; TARGET=""; CONFIRM=""
+    while (($#)); do
+      case "$1" in
+        --target) TARGET="${2:-}"; shift 2 ;;
+        --confirm) CONFIRM="${2:-}"; shift 2 ;;
+        *) die "unknown argument: $1" ;;
+      esac
+    done
+    require_local_target "$TARGET"
+    [[ "$CONFIRM" == "RESET" ]] || die "reset also requires --confirm RESET"
+    "${COMPOSE[@]}" --profile full down --volumes --remove-orphans
+    ;;
+  smoke)
+    profile="core"; [[ "${1:-}" == "--profile" ]] && profile="${2:-}"
+    curl --fail --silent --show-error "http://localhost:${API_PORT:-8000}/health/ready" >/dev/null
+    curl --fail --silent --show-error "http://localhost:${API_PORT:-8000}/metrics" | grep -q aeromaint_build_info
+    case "$profile" in
+      media) curl -fsS "http://localhost:${MEDIA_PORT:-9011}/health/ready" >/dev/null ;;
+      ml) curl -fsS "http://localhost:${ML_PORT:-9012}/health/ready" >/dev/null ;;
+      ai) curl -fsS "http://localhost:${AI_PORT:-9013}/health/ready" >/dev/null ;;
+      observe) curl -fsS "http://localhost:${PROMETHEUS_PORT:-9090}/-/ready" >/dev/null ;;
+      full)
+        curl -fsS "http://localhost:${MEDIA_PORT:-9011}/health/ready" >/dev/null
+        curl -fsS "http://localhost:${ML_PORT:-9012}/health/ready" >/dev/null
+        curl -fsS "http://localhost:${AI_PORT:-9013}/health/ready" >/dev/null
+        curl -fsS "http://localhost:${PROMETHEUS_PORT:-9090}/-/ready" >/dev/null
+        ;;
+    esac
+    echo "$profile smoke passed"
+    ;;
+  ci)
+    "$0" bootstrap
+    UV_CACHE_DIR="${TMPDIR:-/tmp}/aeromaint-uv-cache" \
+      uv run pytest apps/data-api/tests/test_health.py tests/contract/test_local_release.py -q
+    ;;
+  down)
+    write_env; "${COMPOSE[@]}" --profile full down --remove-orphans
+    ;;
+  *)
+    echo "Usage: scripts/local-release {bootstrap|demo|up|seed|backup|restore|reset|smoke|ci|down}"
+    ;;
+esac
