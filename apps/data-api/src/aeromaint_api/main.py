@@ -31,7 +31,11 @@ from aeromaint_api.security.idempotency import IdempotencyStore, InMemoryIdempot
 from aeromaint_api.security.middleware import IdempotencyMiddleware, SecurityHeadersMiddleware
 from aeromaint_api.security.problems import problem_response as security_problem_response
 from aeromaint_api.security.rate_limit import InMemoryRateLimiter, RateLimiter
-from aeromaint_api.services.playback import InMemorySessionRepository, SessionRepository
+from aeromaint_api.services.playback import (
+    EmptySessionRepository,
+    InMemorySessionRepository,
+    SessionRepository,
+)
 
 logger = structlog.get_logger("aeromaint_api")
 structlog.configure(
@@ -82,7 +86,9 @@ def create_app(
         description="Versioned platform API for multimodal capture sessions.",
         lifespan=lifespan,
     )
-    application.state.session_repository = repository or InMemorySessionRepository()
+    application.state.session_repository = repository or (
+        EmptySessionRepository() if settings.empty_state else InMemorySessionRepository()
+    )
     application.state.annotation_repository = InMemoryAnnotationRepository()
     application.state.export_repository = InMemoryExportRepository()
     application.state.copilot_workflow = create_workflow()

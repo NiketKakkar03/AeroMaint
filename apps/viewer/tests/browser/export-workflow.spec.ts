@@ -8,7 +8,7 @@ test("creates a synchronized half-open export and exposes its manifest", async (
   await expect(panel).toBeVisible();
   await page.getByLabel("Sensor export format").selectOption("json");
   await page.getByRole("button", { name: "Create export" }).click();
-  await expect(page.getByRole("status")).toContainText("Export succeeded");
+  await expect(page.getByText("Export succeeded · 100%")).toBeVisible();
   await expect(
     page.getByRole("link", { name: "Download manifest" })
   ).toBeVisible();

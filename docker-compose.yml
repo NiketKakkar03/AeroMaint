@@ -4,6 +4,7 @@ x-api-environment: &api-environment
   AEROMAINT_ENV: development
   AEROMAINT_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-aeromaint}:${POSTGRES_PASSWORD:-aeromaint-local-only}@postgres:5432/${POSTGRES_DB:-aeromaint}
   AEROMAINT_JWT_SECRET: ${AEROMAINT_JWT_SECRET:-development-only-change-me}
+  AEROMAINT_EMPTY_STATE: ${AEROMAINT_EMPTY_STATE:-false}
   AEROMAINT_LOG_FORMAT: json
   PYTHONPATH: /workspace:/workspace/apps/data-api/src:/workspace/apps/worker/src
 
@@ -24,8 +25,10 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-aeromaint}
       POSTGRES_USER: ${POSTGRES_USER:-aeromaint}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aeromaint-local-only}
-    expose: ["5432"]
-    volumes: [aeromaint-postgres:/var/lib/postgresql/data]
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - aeromaint-postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -72,8 +75,11 @@ services:
       dockerfile: apps/viewer/Dockerfile
     profiles: [core, media, ml, ai, observe, full]
     environment:
-      VITE_API_BASE_URL: http://localhost:${API_PORT:-8000}
-    ports: ["${VIEWER_PORT:-5173}:5173"]
+      VITE_API_BASE_URL: /api
+      AEROMAINT_API_TARGET: http://api:8000
+      VITE_API_TOKEN: ${VITE_API_TOKEN:-}
+    ports:
+      - "${VIEWER_PORT:-5173}:5173"
     depends_on:
       api: {condition: service_healthy}
     deploy:

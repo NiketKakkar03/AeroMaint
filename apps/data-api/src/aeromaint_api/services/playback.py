@@ -107,6 +107,25 @@ class InMemorySessionRepository:
         return self._frames.get((session_id, stream_id), ())
 
 
+class EmptySessionRepository:
+    """Repository used by clean-install and empty-state release smoke tests."""
+
+    def sessions(self) -> Sequence[SessionRecord]:
+        return ()
+
+    def session(self, session_id: str) -> SessionRecord | None:
+        del session_id
+        return None
+
+    def samples(self, session_id: str, stream_id: str) -> Sequence[Sample]:
+        del session_id, stream_id
+        return ()
+
+    def frames(self, session_id: str, stream_id: str) -> Sequence[IndexedFrame]:
+        del session_id, stream_id
+        return ()
+
+
 def stream_for(record: SessionRecord, stream_id: str) -> CaptureStream | None:
     return next((stream for stream in record.manifest.streams if stream.id == stream_id), None)
 

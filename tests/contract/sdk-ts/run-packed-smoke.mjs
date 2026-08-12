@@ -134,4 +134,12 @@ const installed = JSON.parse(
 );
 if (!installed.dependencies?.["@aeromaint/capture-sdk"])
   throw new Error("Clean consumer did not install the capture SDK");
+if (process.env.AEROMAINT_RELEASE_OUTPUT) {
+  mkdirSync(process.env.AEROMAINT_RELEASE_OUTPUT, { recursive: true });
+  for (const archive of archives)
+    copyFileSync(
+      join(consumer, archive),
+      join(process.env.AEROMAINT_RELEASE_OUTPUT, archive)
+    );
+}
 process.stdout.write(`clean packed consumer passed: ${consumer}\n`);

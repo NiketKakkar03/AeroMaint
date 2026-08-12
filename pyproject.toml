@@ -5,7 +5,7 @@ description = "Python services and pipelines for AeroMaint Studio"
 requires-python = ">=3.11,<3.13"
 dependencies = [
   "fastapi>=0.116.1,<1",
-  "pyarrow>=21.0.0,<22",
+  "pyarrow>=23.0.1,<24",
   "pydantic-settings>=2.10.1,<3",
   "psycopg[binary]>=3.2.9,<4",
   "structlog>=25.4.0,<26",
@@ -45,7 +45,15 @@ mypy_path = ["apps/data-api/src", "apps/worker/src", "."]
 [tool.pytest.ini_options]
 addopts = "--strict-config --strict-markers --cov=aeromaint_api --cov-report=term-missing"
 pythonpath = [".", "apps/data-api/src", "apps/worker/src"]
-testpaths = ["apps/data-api/tests", "tests/contract", "tests/integration", "tests/ml"]
+testpaths = [
+  "apps/data-api/tests",
+  "tests/contract",
+  "tests/end_to_end",
+  "tests/integration",
+  "tests/load",
+  "tests/ml",
+  "tests/security",
+]
 
 [tool.coverage.run]
 branch = true

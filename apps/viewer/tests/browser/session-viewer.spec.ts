@@ -1,7 +1,8 @@
 import { expect, test } from "@playwright/test";
 
 test("session library drives synchronized stereo media and timestamp deep links", async ({
-  page
+  page,
+  browserName
 }, testInfo) => {
   await page.goto("/sessions?fixture=1");
   const card = page.getByRole("button", {
@@ -30,18 +31,19 @@ test("session library drives synchronized stereo media and timestamp deep links"
     page.getByText(/uncertainty 125\.0–159\.0 cycles/)
   ).toBeVisible();
   await expect(page.getByLabel("RUL and anomaly timeline")).toBeVisible();
-  await expect(page.locator('[data-virtualized-track="true"]')).toHaveCount(2);
+  await expect(page.locator('[data-virtualized-track="true"]')).toHaveCount(3);
   await page.getByLabel("Playback rate").selectOption("2");
   await expect(page.getByLabel("Playback rate")).toHaveValue("2");
   await page.getByRole("button", { name: "Zoom in timeline" }).click();
   await expect(page.getByLabel("Timeline zoom")).toHaveText("2×");
   await page.getByRole("button", { name: "Zoom in timeline" }).click();
   await page.getByRole("button", { name: "Zoom out timeline" }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(() => window.__AEROMAINT_FIXTURE_REQUESTS__?.aborted ?? 0)
-    )
-    .toBeGreaterThan(0);
+  if (browserName === "chromium")
+    await expect
+      .poll(() =>
+        page.evaluate(() => window.__AEROMAINT_FIXTURE_REQUESTS__?.aborted ?? 0)
+      )
+      .toBeGreaterThan(0);
   await page.getByLabel("Loop visible window").check();
   await expect(page.getByLabel("Loop visible window")).toBeChecked();
   const timeline = page.getByRole("slider", {

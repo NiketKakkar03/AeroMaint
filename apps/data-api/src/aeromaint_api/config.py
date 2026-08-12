@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     rate_limit_window_seconds: int = 60
     export_root: str = "data/exports"
     export_ttl_seconds: int = 86_400
+    empty_state: bool = False
 
     @model_validator(mode="after")
     def reject_development_secret_in_production(self) -> "Settings":

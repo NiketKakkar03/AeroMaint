@@ -12,4 +12,8 @@ UV_CACHE_DIR="$stage/uv-cache" uv pip install --python "$stage/venv/bin/python" 
 "$stage/venv/bin/python" "$root/tests/contract/sdk-python/installed-smoke.py"
 UV_CACHE_DIR="$stage/uv-cache" uv pip show --python "$stage/venv/bin/python" --files aeromaint-capture-sdk
 tar -tzf "$stage/dist"/*.tar.gz | grep 'aeromaint_capture/py.typed'
+if [ -n "${AEROMAINT_RELEASE_OUTPUT:-}" ]; then
+  mkdir -p "$AEROMAINT_RELEASE_OUTPUT"
+  cp "$stage/dist"/* "$AEROMAINT_RELEASE_OUTPUT/"
+fi
 printf 'clean packed Python consumer passed: %s\n' "$stage"

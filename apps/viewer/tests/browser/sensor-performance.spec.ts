@@ -15,7 +15,7 @@ test("large virtualized tracks remain responsive and memory bounded", async ({
   await page
     .getByRole("button", { name: /Playable two-camera browser fixture/ })
     .click();
-  await expect(page.locator('[data-virtualized-track="true"]')).toHaveCount(2, {
+  await expect(page.locator('[data-virtualized-track="true"]')).toHaveCount(3, {
     timeout: 20_000
   });
   const baseline = await page.evaluate(() => {

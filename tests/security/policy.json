@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "dependency_scan": {
+    "fail_on": ["high", "critical"],
+    "tools": ["pnpm audit", "pip-audit"]
+  },
+  "image_scan": {
+    "fail_on": ["high", "critical"],
+    "ignore_unfixed": true,
+    "tool": "trivy"
+  }
+}
